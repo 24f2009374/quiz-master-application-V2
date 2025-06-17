@@ -1,0 +1,25 @@
+.rounded-box-purple {
+    border: double 5px transparent;
+    border-radius: 25px;
+    background-image: linear-gradient(black, black), 
+            linear-gradient(to right, rgb(124, 55, 151), rgb(104, 18, 116));
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+}
+
+.rounded-box-blue {
+    border: double 5px transparent;
+    border-radius: 25px;
+    background-image: linear-gradient(black, black), 
+            linear-gradient(to right, rgb(49, 43, 136), rgb(13, 19, 110));
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+}
+
+.linked-card {
+    transition: border 0.5s;
+}
+
+.linked-card:hover {
+    border: solid 4px red;
+}
