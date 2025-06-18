@@ -28,7 +28,11 @@ const { createApp, ref } = Vue;
 
 
                     } catch(err) {
-                        error.value = err.response?.data?.error || "Registration failed.";
+                        if (err.response && err.response.data && err.response.data.error) {
+                            error.value = err.response.data.error;
+                        } else {
+                            error.value = "Registration failed.";
+                    }
                     }
 
                 };

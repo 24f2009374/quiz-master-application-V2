@@ -1,5 +1,6 @@
 from app import db
 from flask_login import UserMixin
+from app import login_manager
 from werkzeug.security import check_password_hash, generate_password_hash
 
 
@@ -35,9 +36,9 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"Users(username={self.username}, email={self.email})"
     
-    """@login_manager.user_loader
+    @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))"""
+        return User.query.get(int(user_id))
     
     enrolled_quizzes = db.relationship('Quiz', secondary='enrollments', back_populates='enrolled_users') #relates to quiz and enrolled_users
     

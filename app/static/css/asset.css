@@ -23,3 +23,7 @@
 .linked-card:hover {
     border: solid 4px red;
 }
+
+[v-cloak] {
+  display: none;
+}

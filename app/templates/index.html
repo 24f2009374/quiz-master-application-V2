@@ -3,10 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet", href="{{ url_for('static', filename='css/asset.css') }}">
 </head>
-<body>
-    <h1>Here it begins</h1>
-    <a href="/register">Register</a>
+<body class="bg-black bg-gradient">
+    <div class="container text-center rounded-box-blue text-light shadow-lg" style="height: 300px; padding: 0; margin-top: 250px; background-color: rgb(34, 33, 33); margin-bottom: 400px;">
+        <div class="row h-100 align-items-center">
+
+            <div class="col-6 d-flex justify-content-center align-items-center h-100">
+                <div class="card linked-card w-50 bg-dark text-light" style="width: 280px;">
+                    <div class="card-body">
+                      <h5 class="card-title">Register</h5>
+                      <p class="card-text">Not yet Registered? Register Now to Access Quizzes!</p>
+                      <a href="/register" class="link-primary">Register Now!</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col d-flex justify-content-center align-items-center h-100" style="border-left: double 5px transparent; border-image: linear-gradient(to bottom, rgb(38, 31, 139), rgb(12, 20, 122)) 1; border-image-slice: 1;">
+                <div class="card linked-card w-50 bg-dark text-light" style="width: 250px; padding-left: 15px; padding-right: 15px;">
+                    <div class="card-body">
+                      <h5 class="card-title">Login</h5>
+                      <p class="card-text">Registered already? Login to Continue!</p>
+                      <a href="/login" class="link-danger">Login!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

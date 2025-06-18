@@ -1,11 +1,24 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from app import db, Api
 from app.models import User, Subject, Chapter, Quiz, Questions, Scores, Enrollments
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
+from flask_login import login_required, current_user, logout_user, login_user, login_manager
 
 bp_main=Blueprint('main',__name__)
+
+#--------------------------------------------ADMIN WRAPPER--------------------------------------------
+def admin_required(f):
+    @wraps(f)
+    def decor(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash("You do not have permission to view this page!", "danger")
+            return redirect(url_for('home'))  # Redirect non-admins to home
+        return f(*args, **kwargs)
+    return decor
+
+#--------------------------------------------API SECTION--------------------------------------------
 
 user_args=reqparse.RequestParser()
 user_args.add_argument('username', type=str, required=True, help="Username cannot be blank")
@@ -36,13 +49,46 @@ class Register(Resource):
 
         return {"message": "User registered successfully"}, 201
     
+class Login(Resource):
+    def post(self):
+        data=request.get_json()
+        email=data.get('email')
+        password=data.get('password')
 
+        if not email or not password:
+            return {"error": "Both fields are required"}, 400
+        
+        user=User.query.filter_by(email=email).first()
+
+        if not user or not user.check_password(password):
+            return {"error": "Invalid email or password"}, 401
+        
+        login_user(user)
+
+        if user.role == "admin":
+            return jsonify({"redirect": url_for('main.admin_dashboard')})
+        else:
+            return jsonify({"redirect": url_for('main.user_dashboard', user_id=user.user_id)})
+    
+
+#--------------------------------------------MAIN ROUTES--------------------------------------------
 
 
 @bp_main.route('/')
 def home():
     return render_template('index.html')
+
 @bp_main.route('/register')
 def register():
     return render_template('register.html')
+
+@bp_main.route('/login')
+def login():
+    return render_template('login.html')
+
+@bp_main.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    return render_template("admin_templates/admin_dashboard.html")
 
