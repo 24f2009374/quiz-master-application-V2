@@ -70,9 +70,32 @@ class Login(Resource):
         else:
             return jsonify({"redirect": url_for('main.user_dashboard', user_id=user.user_id)})
     
+class DB_Subjects(Resource):
+    method_decorators=[login_required]
+    
+    def get(self):
+        subs=Subject.query.all()
+        return [{'id':s.sub_id, 'name':s.sub_name, 'desc':s.sub_desc} for s in subs]
+    
+    def post(self):
+        data=request.get_json()
+        sub_name=data.get('sub_name')
+        sub_desc=data.get('sub_desc')
 
+        if not sub_name or not sub_desc:
+            return {"error": "Both fields are required"}, 400
+        
+        subj=Subject.query.filter_by(sub_name=sub_name).first()
+
+        if subj:
+            return {"error": "Subject Exists"}, 401
+        
+        new_sub= Subject(sub_name=sub_name, sub_desc=sub_desc)
+        db.session.add(new_sub)
+        db.session.commit()
+
+        return {'message': 'Subject created successfully'}, 201
 #--------------------------------------------MAIN ROUTES--------------------------------------------
-
 
 @bp_main.route('/')
 def home():
@@ -85,6 +108,38 @@ def register():
 @bp_main.route('/login')
 def login():
     return render_template('login.html')
+
+@bp_main.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('main.login')) 
+
+#--------------------------------------------ADMIN ROUTES--------------------------------------------
+
+@bp_main.route('/admin/subjects/create')
+@login_required
+@admin_required
+def create_subject():
+    return render_template('admin_templates/create_subject.html')
+
+@bp_main.route('/admin/chapters')
+@login_required
+@admin_required
+def view_chapters():
+    return "Chapters view"
+
+@bp_main.route('/admin/quizzes')
+@login_required
+@admin_required
+def view_quizzes():
+    return "All Quizzes"
+
+@bp_main.route('/admin/users')
+@login_required
+@admin_required
+def view_users():
+    return "All Users"
+
 
 @bp_main.route('/admin/dashboard')
 @login_required

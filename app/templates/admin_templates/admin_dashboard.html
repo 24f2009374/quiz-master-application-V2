@@ -1,11 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-</head>
-<body>
-    <h1>Admin Place</h1>
-</body>
-</html>
+{% extends "admin_base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block links %}<link rel="stylesheet", href="{{ url_for('static', filename='css/ad_dshb_trans.css') }}">{% endblock %}
+
+{% block content %}
+
+<h2>Admin Dashboard</h2>
+<p>Use the links above to manage subjects, chapters, quizzes, and users.</p>
+
+<div class="mt-4 v-cloak" id="app">
+    <!--Clickable Header-->
+    <div class="click-row py-2 text-center" @click="togglePanel" :class="{ open: panelOpen }">
+        <strong>Subjects Menu</strong>
+    </div>
+    <!--Slideale Panel-->
+    <transition name="slide-fade">
+        <div v-if="panelOpen" class="panel p-4">
+            <div class="row g-3">
+                <div v-if="!subjects.length" class="text-center text-muted w-100">
+                    <p style="color: white;">No Subjects Yet? </p><a href="/admin/subjects/create">Create Subjects</a>
+                </div>
+        
+        <!-- For Goes Here--> <!--  {% raw %}{% endraw %} -->
+
+                <div v-for="subject in subjects" :key="subject.id" class="col-12 col-sm-6 col-md-4">
+                    <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;">
+                        <div class="card-body border-black">
+                            <h5 class="card-title"> {% raw %}{{ subject.name }}{% endraw %}</h5>
+                            <p class="card-text">{% raw %}{{ subject.desc }}{% endraw %}</p>
+                        </div>
+
+                        <div class="card-footer border-black">
+                            <a href="#" class="card-link link-warning">Create Chapter</a>
+                            <a href="#" class="card-link link-info">View Chapters</a>
+                            <button class="btn btn-warning mx-1 btn-sm" title="Update">
+                                <a href="#"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>
+                            </button>
+                            <div>
+                                <form action="#" method="POST">
+                                    <button class="btn btn-danger mx-1 btn-sm" title="Delete">
+                                        <input type="hidden" name="next" value="{{ request.url }}">
+                                        <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="/admin/subjects/create">+ Create Subjects</a>
+                </div>
+            </div>
+        </div>
+  </transition>
+  
+  
+  <div class="content-wrapper" :style="contentCalc">
+    <h1>Tester</h1>
+  </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin_dash.js') }}"></script>
+
+{% endblock %}
