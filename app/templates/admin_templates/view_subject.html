@@ -1,0 +1,49 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Subject View{% endblock %}
+
+{%block content%}
+<div id="app" class="container mt-4" v-cloak>
+    <h1>{% raw %}{{SubjectObj.name}}{% endraw %} Hello</h1>
+
+    <div v-if="!Chapters.length" class="text-center text-muted w-100">
+        <p style="color: white;">No Chapters Yet? </p><a :href="'/admin/subjects/' + SubjectObj.id + '/chapters/create'">Create Chapters</a>
+    </div>
+
+    <div v-for="chapter in Chapters" :key="chapter.id" class="col-12 col-sm-6 col-md-4">
+        <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;">
+            <div class="card-body border-black">
+                <h5 class="card-title"> {% raw %}{{ chapter.name }}{% endraw %}</h5>
+                <p class="card-text">{% raw %}{{ chapter.desc }}{% endraw %}</p>
+            </div>
+
+            <div class="card-footer border-black">
+                <a href="#" class="card-link link-warning">Create Quiz</a>
+                <a href="#" class="card-link link-info">View Chapter</a>
+            
+                <button class="btn btn-warning mx-1 btn-sm" title="Update">
+                    <a href="#"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>
+                </button>
+
+
+                <form action="#" method="POST">
+                    <button class="btn btn-danger mx-1 btn-sm" title="Delete">
+                        <input type="hidden" name="next" value="{{ request.url }}">
+                        <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-top: 50px;">
+        <a :href="'/admin/subjects/' + SubjectObj.id + '/chapters/create'">+ Create Chapters</a>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/view_subject.js') }}"></script>
+
+{% endblock %}

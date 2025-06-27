@@ -18,8 +18,6 @@ const { createApp, ref, onMounted, computed } = Vue;
                 try {
                     const response = await axios.get('/api/subjects/crud');
                     subjects.value=response.data;
-                    console.log(subjects.value)
-                    console.log(response.data)
                 } catch(err) {
                     console.error("Smth went wrong:"+err)
                 }

@@ -18,7 +18,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decor
 
-#--------------------------------------------API SECTION--------------------------------------------
+"""---------------------------------------------------------API SECTION---------------------------------------------------------"""
 
 user_args=reqparse.RequestParser()
 user_args.add_argument('username', type=str, required=True, help="Username cannot be blank")
@@ -70,6 +70,9 @@ class Login(Resource):
         else:
             return jsonify({"redirect": url_for('main.user_dashboard', user_id=user.user_id)})
     
+
+#--------------------------------------------CRUD RESOURCES--------------------------------------------
+
 class DB_Subjects(Resource):
     method_decorators=[login_required]
     
@@ -95,6 +98,57 @@ class DB_Subjects(Resource):
         db.session.commit()
 
         return {'message': 'Subject created successfully'}, 201
+    
+class DB_Chapters(Resource):
+    method_decorators=[login_required]
+    def get(self, sub_id):
+        chaps=Chapter.query.filter_by(subject_id=sub_id)
+        return [{'id':c.chap_id, 'name':c.chap_name, 'desc':c.chap_desc, 'parent':c.subject_id} for c in chaps]
+    
+    def post(self, sub_id):
+        data=request.get_json()
+        chap_name=data.get('chap_name')
+        chap_desc=data.get('chap_desc')
+        sub_id=data.get('sub_id')
+
+        if not chap_name or not chap_desc:
+            return {"error": "Both fields are required"}, 400
+        
+        chap=Chapter.query.filter_by(chap_name=chap_name).first()
+
+        if chap:
+            return {"error": "Subject Exists"}, 401
+        
+        new_chap= Chapter(chap_name=chap_name, chap_desc=chap_desc, subject_id=sub_id)
+        db.session.add(new_chap)
+        db.session.commit()
+
+        return {'message': 'Subject created successfully'}, 201
+    
+    pass
+class DB_Quizzes(Resource):
+    pass
+class DB_Questions(Resource):
+    pass
+
+#--------------------------------------------HEIRARCHIAL VIEW RESOURCES--------------------------------------------
+class SubjectDetail(Resource):
+    method_decorators=[login_required]
+    def get(self, sub_id):
+        subject=Subject.query.filter_by(sub_id=sub_id).first()
+        if not subject:
+            return {"error":"Subject Not Found"}, 404
+        return {"id": subject.sub_id, "name": subject.sub_name, "desc": subject.sub_desc}
+
+class ChapterDetail(Resource):
+    pass
+
+class QuizDetail(Resource):
+    pass
+
+class QuestionDetail(Resource):
+    pass
+
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
 @bp_main.route('/')
@@ -114,13 +168,48 @@ def logout():
     logout_user()
     return redirect(url_for('main.login')) 
 
-#--------------------------------------------ADMIN ROUTES--------------------------------------------
+"""--------------------------------------------------------ADMIN ROUTES--------------------------------------------------------"""
+@bp_main.route('/admin/dashboard')
+@login_required
+@admin_required
+def admin_dashboard():
+    return render_template("admin_templates/admin_dashboard.html")
+
+#--------------------------------------------DB CREATES--------------------------------------------
 
 @bp_main.route('/admin/subjects/create')
 @login_required
 @admin_required
 def create_subject():
     return render_template('admin_templates/create_subject.html')
+
+@bp_main.route('/admin/subjects/<int:sub_id>/chapters/create')
+@login_required
+@admin_required
+def create_chapter(sub_id):
+    return render_template('admin_templates/create_chapter.html')
+
+
+
+#--------------------------------------------DB UPDATES--------------------------------------------
+
+
+
+#--------------------------------------------DB DELETES--------------------------------------------
+
+
+
+#--------------------------------------------DB VIEWS--------------------------------------------
+@bp_main.route('/admin/subjects/<int:sub_id>')
+@login_required
+@admin_required
+def view_subject(sub_id): #Goes into Subject to view chapters and options
+    return render_template('admin_templates/view_subject.html')
+
+
+
+
+
 
 @bp_main.route('/admin/chapters')
 @login_required
@@ -141,9 +230,5 @@ def view_users():
     return "All Users"
 
 
-@bp_main.route('/admin/dashboard')
-@login_required
-@admin_required
-def admin_dashboard():
-    return render_template("admin_templates/admin_dashboard.html")
+
 

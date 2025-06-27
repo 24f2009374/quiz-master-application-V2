@@ -32,7 +32,7 @@
 
                         <div class="card-footer border-black">
                             <a href="#" class="card-link link-warning">Create Chapter</a>
-                            <a href="#" class="card-link link-info">View Chapters</a>
+                            <a :href="'/admin/subjects/' + subject.id" class="card-link link-info">View Subject</a>
                             <button class="btn btn-warning mx-1 btn-sm" title="Update">
                                 <a href="#"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>
                             </button>
