@@ -13,6 +13,9 @@
 
         <!--Message Handling-->
     <div id="app" class="container mt-5" v-cloak>
+        <div>
+            <button @click="goBack" class="btn btn-secondary">← Back</button>
+        </div>
         <div class="container">
             <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
                         Error: {% raw %} {{ error }} {% endraw %}

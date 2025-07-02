@@ -2,7 +2,11 @@ const { createApp, ref, onMounted }=Vue;
 createApp({
     setup(){
         const SubjectObj=ref({ id:'', name:'', desc:'' });
-        const Chapters=ref([])
+        const Chapters=ref([]);
+
+        const goBack = () => {
+                    window.history.back();
+                };
 
         onMounted(async () => {
             const parts=window.location.pathname.split('/');
@@ -21,7 +25,7 @@ createApp({
             }
         });
 
-        return { SubjectObj, Chapters };
+        return { SubjectObj, Chapters, goBack };
 
 
     }

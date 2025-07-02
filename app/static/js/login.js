@@ -6,6 +6,10 @@ const { createApp, ref } = Vue;
 
                 const error= ref('');
 
+                const goBack = () => {
+                    window.history.back();
+                };
+
                 const loginUser = async () => {
                     error.value='';
 
@@ -25,6 +29,6 @@ const { createApp, ref } = Vue;
                         error.value = err.response?.data?.error || "Login failed.";
                     }
                 };
-                return { form, error, loginUser };
+                return { form, error, loginUser, goBack };
             }
         }).mount("#app")

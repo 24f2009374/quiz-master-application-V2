@@ -24,14 +24,14 @@
         <!-- For Goes Here--> <!--  {% raw %}{% endraw %} -->
 
                 <div v-for="subject in subjects" :key="subject.id" class="col-12 col-sm-6 col-md-4">
-                    <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;">
+                    <div class="card text-bg-secondary border-black " style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
                         <div class="card-body border-black">
                             <h5 class="card-title"> {% raw %}{{ subject.name }}{% endraw %}</h5>
                             <p class="card-text">{% raw %}{{ subject.desc }}{% endraw %}</p>
                         </div>
 
                         <div class="card-footer border-black">
-                            <a href="#" class="card-link link-warning">Create Chapter</a>
+                            <a :href="'/admin/subjects/' + subject.id + '/chapters/create'" class="card-link link-warning">Create Chapter</a>
                             <a :href="'/admin/subjects/' + subject.id" class="card-link link-info">View Subject</a>
                             <button class="btn btn-warning mx-1 btn-sm" title="Update">
                                 <a href="#"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>

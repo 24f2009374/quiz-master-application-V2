@@ -1,0 +1,126 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Create Question{% endblock %}
+
+{%block content%}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<div id="app" class="container mt-5" v-cloak>
+    <div>
+        <button @click="goBack" class="btn btn-secondary">← Back</button>
+    </div>
+        <div class="container">
+            <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Error: {% raw %} {{ error }} {% endraw %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+                        Success:{% raw %} {{ success }} {% endraw %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+        </div>
+
+        <div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
+            <div class="text-center">
+                <h2 class="my-3" style="padding-top: 15px;">Create Question</h2>
+                <p class="lead">Questions make the Quiz</p>
+            </div>
+            <div class="row justify-content my-3">
+                <div class="col-lg-6 mx-auto">
+                    <form @submit.prevent="submitForm" class="needs-validation">
+                        <!-- Question Statement -->
+                        <div class="mb-3">
+                            <label class="form-label">Question Name</label>
+                            <input type="text" v-model="form.question" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                             <strong><p>Enter Options, A minimum of 2</p></strong>
+                        </div>
+                        <!-- Options -->
+                        <div class="mb-2" v-for="(opt, idx) in form.options" :key="idx">
+                            <div class="mb-3">
+                                <label class="form-label">Option {% raw %}{{ idx+1 }}{% endraw %}</label>
+                                <input type="text" v-model="form.options[idx]" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Correct Option (1-4)</label>
+                            <input type="number" v-model="form.correct" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Marks</label>
+                            <input type="number" v-model="form.marks" class="form-control" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success">Create</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!--<script src="{{ url_for('static', filename='js/create_quiz.js') }}"></script> -->
+<script>
+    const { createApp, ref } = Vue;
+        createApp({
+            setup(){
+                const form = ref({ question:'', correct:'', marks:'', options:['','','','']});
+
+                const error= ref('');
+                const success= ref('');
+                const quiz_id=ref();
+
+                const goBack = () => {
+                    window.history.back();
+                };
+
+                const submitForm = async () => {
+                    error.value=''; success.value='';
+
+                    console.log(form.value)
+
+                    const nonEmptyOptions = form.value.options.filter(opt => opt.trim() !== '');
+
+                    //Integrity checks
+                    if(nonEmptyOptions.length<2){
+                        error.value="Minimum options are two"
+                    }
+                        
+                    if(!form.value.options[form.value.correct-1]){
+                        error.value="Correct Option and Options do not match"
+                    }
+
+                try {
+                        const parts=window.location.pathname.split('/');
+                        quiz_id.value=parseInt(parts[parts.length-3]);
+
+                        const response= await axios.post(`/api/quizzes/${quiz_id.value}/questions/crud`, {question:form.value.question, correct:form.value.correct, marks:form.value.marks, options:form.value.options, quiz_id:quiz_id.value});
+                        success.value=response.data.message;
+
+
+                        form.value={ question:'', correct:'', marks:'', options:['','','','']};
+
+
+                    } catch(err) {
+                        if (err.response && err.response.data && err.response.data.error) {
+                            error.value = err.response.data.error;
+                        } else {
+                            error.value = "Creation failed."+err;
+                    }
+                    }
+
+                };
+
+                return {
+                    form, error, success, submitForm, goBack
+                };
+            }
+        }).mount("#app");
+</script>
+{% endblock %}

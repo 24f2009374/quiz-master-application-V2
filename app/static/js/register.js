@@ -6,6 +6,10 @@ const { createApp, ref } = Vue;
                 const error= ref('');
                 const success= ref('');
 
+                const goBack = () => {
+                    window.history.back();
+                };
+
                 const submitForm = async () => {
                     error.value=''; success.value='';
 
@@ -41,7 +45,7 @@ const { createApp, ref } = Vue;
                     form,
                     error,
                     success,
-                    submitForm
+                    submitForm, goBack
                 };
             }
         }).mount("#app");
