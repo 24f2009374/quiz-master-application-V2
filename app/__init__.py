@@ -45,7 +45,7 @@ def create_app():
     api.add_resource(DB_Quizzes, '/api/chapters/<int:chap_id>/quizzes/crud')
     api.add_resource(QuizDetail, '/api/quizzes/<int:quiz_id>')
     api.add_resource(DB_Questions, '/api/quizzes/<int:quiz_id>/questions/crud')
-    api.add_resource(QuestionDetail, '/api/questions/<int:ques_id>')
+    api.add_resource(QuestionDetail, '/api/questions/<int:q_id>')
 
 
     

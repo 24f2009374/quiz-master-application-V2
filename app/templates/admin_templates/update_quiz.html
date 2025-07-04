@@ -1,6 +1,6 @@
 {% extends "admin_base.html" %}
 
-{% block title %}Create Question{% endblock %}
+{% block title %}Create Quiz{% endblock %}
 
 {%block content%}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -25,39 +25,26 @@
 
         <div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
             <div class="text-center">
-                <h2 class="my-3" style="padding-top: 15px;">Create Question</h2>
-                <p class="lead">Questions make the Quiz</p>
+                <h2 class="my-3" style="padding-top: 15px;">Update Chapter</h2>
+                <p class="lead">Subjects House Quizzes</p>
             </div>
             <div class="row justify-content my-3">
                 <div class="col-lg-6 mx-auto">
                     <form @submit.prevent="submitForm" class="needs-validation">
-                        <!-- Question Statement -->
                         <div class="mb-3">
-                            <label class="form-label">Question Name</label>
-                            <input type="text" v-model="form.question" class="form-control" required>
+                            <label class="form-label">Quiz Name</label>
+                            <input type="text" v-model="form.quiz_name" class="form-control" required>
+                        </div>                   
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" v-model="form.date" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                             <strong><p>Enter Options, A minimum of 2</p></strong>
-                        </div>
-                        <!-- Options -->
-                        <div class="mb-2" v-for="(opt, idx) in form.options" :key="idx">
-                            <div class="mb-3">
-                                <label class="form-label">Option {% raw %}{{ idx+1 }}{% endraw %}</label>
-                                <input type="text" v-model="form.options[idx]" class="form-control">
-                            </div>
-                        </div>
+                            <label class="form-label">Time (In Minutess)</label>
+                            <input type="number" v-model="form.time" class="form-control" required>
+                        </div>                    
                         
-                        <div class="mb-3">
-                            <label class="form-label">Correct Option (1-4)</label>
-                            <input type="number" v-model="form.correct" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Marks</label>
-                            <input type="number" v-model="form.marks" class="form-control" required>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-success">Create</button>
+                        <button type="submit" class="btn btn-success">Update</button>
                     </form>
                 </div>
             </div>
@@ -65,5 +52,5 @@
     </div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="{{ url_for('static', filename='js/create_question.js') }}"></script>
+<script src="{{ url_for('static', filename='js/update_quiz.js') }}"></script>
 {% endblock %}

@@ -99,6 +99,25 @@ class DB_Subjects(Resource):
         db.session.commit()
 
         return {'message': 'Subject created successfully'}, 201
+
+    def put(self):
+        data=request.get_json()
+        sub_name=data.get('name')
+        sub_desc=data.get('desc')
+        sub_id=data.get('sub_id')
+
+        sub=Subject.query.filter_by(sub_id=sub_id).first()
+        print(data)
+
+        if not sub:
+            return {"error":"Subject Not Found"}, 404
+        
+        sub.sub_name=sub_name
+        sub.sub_desc=sub_desc
+
+        db.session.commit()
+
+        return {'message': 'Subject updated successfully'}, 200
     
 class DB_Chapters(Resource):
     method_decorators=[login_required]
@@ -126,7 +145,22 @@ class DB_Chapters(Resource):
 
         return {'message': 'Chapter created successfully'}, 201
     
-    pass
+    def put(self, sub_id):
+        data=request.get_json()
+        chap_name=data.get('name')
+        chap_desc=data.get('desc')
+        chap_id=data.get('chap_id')
+
+        chapter=Chapter.query.filter_by(chap_id=chap_id).first()
+        print(data)
+
+        if not chapter:
+            return {"error":"Chapter Not Found"}, 404
+        
+        chapter.chap_name=chap_name
+        chapter.chap_desc=chap_desc
+        db.session.commit()
+        return {'message': 'Chapter updated successfully'}, 200
 
 class DB_Quizzes(Resource):
     method_decorators=[login_required]
@@ -156,6 +190,26 @@ class DB_Quizzes(Resource):
         db.session.commit()
 
         return {'message': 'Quiz created successfully'}, 201
+    
+    def put(self, chap_id):
+        data=request.get_json()
+        name=data.get('name')
+        time=data.get('time')
+        date_str=data.get('date')
+        quiz_id=data.get('quiz_id')
+
+        quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
+
+        date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+
+        if not quiz:
+            return {"error":"Quiz Not Found"}, 404
+        
+        quiz.quiz_name=name
+        quiz.time=time
+        quiz.date=date_obj
+        db.session.commit()
+        return {'message': 'Quiz updated successfully'}, 200
     
 class DB_Questions(Resource):
     method_decorators=[login_required]
@@ -195,6 +249,33 @@ class DB_Questions(Resource):
         db.session.commit()
 
         return {'message': 'Question created successfully'}, 201
+    
+    def put(self, quiz_id):
+        data=request.get_json()
+        question_statement=data.get('question')
+        correct=data.get('correct')
+        marks=data.get('marks')
+        options=data.get('options')
+        qid=data.get('q_id')
+        ques=Questions.query.filter_by(qid=qid).first()
+
+        if not ques:
+            return {"error":"Question Not Found"}, 404
+        
+        ques.question_statement=question_statement
+        ques.quiz_id=quiz_id
+        ques.marks=marks
+        ques.correct_option=correct
+        ques.option_1=options[0] if options[0] else None
+        ques.option_2=options[1] if options[1] else None 
+        ques.option_3=options[2] if options[2] else None 
+        ques.option_4=options[3] if options[3] else None
+        db.session.commit()
+        return {'message': 'Question updated successfully'}, 200
+
+
+    def delete(self, quiz_id):
+        pass
 
 #--------------------------------------------HEIRARCHIAL VIEW RESOURCES--------------------------------------------
 class SubjectDetail(Resource):
@@ -211,19 +292,25 @@ class ChapterDetail(Resource):
         chapter=Chapter.query.filter_by(chap_id=chap_id).first()
         if not chapter:
             return {"error":"Chapter Not Found"}, 404
-        return {"id": chapter.chap_id, "name": chapter.chap_name, "desc": chapter.chap_desc}
+        return {"id": chapter.chap_id, "name": chapter.chap_name, "desc": chapter.chap_desc, "parent":chapter.subject_id}
     pass
 
 class QuizDetail(Resource):
     method_decorators=[login_required]
+
     def get(self, quiz_id):
         quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
         if not quiz:
             return {"error":"Quiz Not Found"}, 404
-        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.isoformat()}
+        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":quiz.chapter_id}
 
 class QuestionDetail(Resource):
-    pass
+    method_decorators=[login_required]
+    def get(self, q_id):
+        q=Questions.query.filter_by(qid=q_id).first()
+        if not q:
+            return {"error":"Question Not Found"}, 404
+        return {'id':q.qid,'statement':q.question_statement, 'parent':q.quiz_id, 'correct':q.correct_option, 'marks':q.marks, 'options':[q.option_1,q.option_2,q.option_3,q.option_4]}
 
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
@@ -280,6 +367,32 @@ def create_question(quiz_id):
 
 
 #--------------------------------------------DB UPDATES--------------------------------------------
+
+@bp_main.route('/admin/subjects/update/<int:sub_id>')
+@login_required
+@admin_required
+def update_subject(sub_id):
+    return render_template('admin_templates/update_subject.html')
+
+@bp_main.route('/admin/chapters/update/<int:chap_id>')
+@login_required
+@admin_required
+def update_chapter(chap_id):
+    return render_template('admin_templates/update_chapter.html')
+
+@bp_main.route('/admin/quizzes/update/<int:quiz_id>')
+@login_required
+@admin_required
+def update_quiz(quiz_id):
+    return render_template('admin_templates/update_quiz.html')
+
+@bp_main.route('/admin/questions/update/<int:q_id>')
+@login_required
+@admin_required
+def update_question(q_id):
+    return render_template('admin_templates/update_question.html')
+
+
 
 
 
