@@ -1,11 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-</head>
-<body>
-    User Place: {{ user_id }}
-</body>
-</html>
+{% extends "user_base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block links %}{% endblock %}
+
+{% block user %} {{user.username}} {% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-4" id="app" data-user-id="{{ current_user.user_id }}">
+    <h3>To add</h3>
+        Enrollment setup
+        all Quizzes
+        all enrollments
+        quiz itself
+        scorecard / user-self
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!--<script src="{{ url_for('static', filename='js/view_quiz.js') }}"></script>  -->
+<script>
+    const { createApp, ref, onMounted } = Vue;
+    createApp({
+        setup(){
+            const userObj=ref({});
+
+            const userId = document.getElementById('app').dataset.userId;
+            
+            onMounted(async () => {
+                const response = await axios.get(`/api/users/${userId}`);
+                userObj.value=response.data;
+
+            })
+
+
+            
+            return { userId, userObj,name }
+        }
+    }).mount("#app")
+</script>
+
+{% endblock %}

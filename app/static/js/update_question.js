@@ -45,7 +45,7 @@ const { createApp, ref, onMounted } = Vue;
                     }
 
                     try {
-                        await axios.put(`/api/quizzes/${quesObj.value.parent}/questions/crud`, {question:form.value.question, correct:form.value.correct, marks:form.value.marks, options:form.value.options, q_id:quesObj.value.parent})
+                        await axios.put(`/api/quizzes/${quesObj.value.parent}/questions/crud`, {question:form.value.question, correct:form.value.correct, marks:form.value.marks, options:form.value.options, q_id:quesObj.value.id})
                         success.value = "Question updated successfully!";
                         
                         setTimeout(() => {
@@ -60,6 +60,8 @@ const { createApp, ref, onMounted } = Vue;
                     }
 
                 };
+
+                
 
                 return {
                     form, error, success, submitForm, goBack

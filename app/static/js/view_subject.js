@@ -4,6 +4,9 @@ createApp({
         const SubjectObj=ref({ id:'', name:'', desc:'' });
         const Chapters=ref([]);
 
+        const error=ref("");
+        const success=ref("");
+
         const goBack = () => {
                     window.history.back();
                 };
@@ -25,7 +28,29 @@ createApp({
             }
         });
 
-        return { SubjectObj, Chapters, goBack };
+        const confirmDelete=async (chap_id) => {
+                const sure=confirm("Are you sure? This will delete subject and all related quizzes, questions and data");
+                if(!sure) return;
+                
+                try {
+                    await axios.delete(`/api/subjects/${SubjectObj.value.id}/chapters/crud/${chap_id}`);
+                    success.value="Subject deleted successfully!";
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                } catch(err) {
+                    error.value=err;
+                }
+            };
+
+            window.addEventListener("pageshow", function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+
+        return { SubjectObj, Chapters, goBack, confirmDelete, error, success };
 
 
     }

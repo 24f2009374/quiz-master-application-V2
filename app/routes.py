@@ -30,6 +30,10 @@ class Users(Resource):
         users=User.query.all()
         return [u.to_dict() for u in users], 200
     
+    def get(self, user_id):
+        user=User.query.filter_by(user_id=user_id).first()
+        return user.to_dict(), 200
+    
 class Register(Resource):
     def post(self):
         data = request.get_json()
@@ -119,6 +123,32 @@ class DB_Subjects(Resource):
 
         return {'message': 'Subject updated successfully'}, 200
     
+    def delete(self, sub_id):
+        print("ENDPOINT REACHED  WITH SUBJECT ID ", sub_id)
+
+        subject=Subject.query.filter_by(sub_id=sub_id).first()
+        if not subject:
+            return {'error': 'Subject not found'}, 404
+
+        #Chapters
+        chapters=Chapter.query.filter_by(subject_id=sub_id).all()
+        for chap in chapters:
+            #Quizzes
+            quizzes=Quiz.query.filter_by(chapter_id=chap.chap_id).all()
+            for quiz in quizzes:
+                #Questions
+                Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+
+                # Step 4: Delete the quiz itself
+                db.session.delete(quiz)
+            # Step 5: Delete the chapter
+            db.session.delete(chap)
+        # Step 6: Delete the subject
+        db.session.delete(subject)
+
+        db.session.commit()
+        return {'message': 'Subject and all related data deleted successfully.'}, 200
+   
 class DB_Chapters(Resource):
     method_decorators=[login_required]
     def get(self, sub_id):
@@ -161,6 +191,20 @@ class DB_Chapters(Resource):
         chapter.chap_desc=chap_desc
         db.session.commit()
         return {'message': 'Chapter updated successfully'}, 200
+    
+    def delete(self, sub_id, chap_id):
+        print("ENDPOINT REACHED  WITH CHAPTER ID ", chap_id)
+        chapter=Chapter.query.filter_by(chap_id=chap_id).first()
+
+        quizzes=Quiz.query.filter_by(chapter_id=chap_id).all()
+        for quiz in quizzes:
+            Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+            db.session.delete(quiz)
+
+        db.session.delete(chapter)
+        db.session.commit()
+
+        return {'message': 'Chapter and all related data deleted successfully.'}, 200
 
 class DB_Quizzes(Resource):
     method_decorators=[login_required]
@@ -211,6 +255,16 @@ class DB_Quizzes(Resource):
         db.session.commit()
         return {'message': 'Quiz updated successfully'}, 200
     
+    def delete(self, chap_id, quiz_id):
+        
+
+        quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
+        Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+        db.session.delete(quiz)
+        db.session.commit()
+
+        return {'message': 'Quiz and all related data deleted successfully.'}, 200
+
 class DB_Questions(Resource):
     method_decorators=[login_required]
     def get(self, quiz_id):
@@ -273,9 +327,12 @@ class DB_Questions(Resource):
         db.session.commit()
         return {'message': 'Question updated successfully'}, 200
 
+    def delete(self, quiz_id, q_id):
 
-    def delete(self, quiz_id):
-        pass
+        Questions.query.filter_by(qid=q_id).delete()
+        db.session.commit()
+
+        return {'message': 'Question deleted successfully.'}, 200
 
 #--------------------------------------------HEIRARCHIAL VIEW RESOURCES--------------------------------------------
 class SubjectDetail(Resource):
@@ -364,8 +421,6 @@ def create_quiz(chap_id):
 def create_question(quiz_id):
     return render_template('admin_templates/create_question.html')
 
-
-
 #--------------------------------------------DB UPDATES--------------------------------------------
 
 @bp_main.route('/admin/subjects/update/<int:sub_id>')
@@ -392,14 +447,6 @@ def update_quiz(quiz_id):
 def update_question(q_id):
     return render_template('admin_templates/update_question.html')
 
-
-
-
-
-#--------------------------------------------DB DELETES--------------------------------------------
-
-
-
 #--------------------------------------------DB VIEWS--------------------------------------------
 @bp_main.route('/admin/subjects/<int:sub_id>')
 @login_required
@@ -419,29 +466,9 @@ def view_chapter(chap_id): #Goes into Chapter to view Quizzes and options
 def view_quiz(quiz_id): #Goes into Chapter to view Quizzes and options
     return render_template('admin_templates/view_quiz.html')
 
-
-
-
-
-
-@bp_main.route('/admin/chapters')
+"""--------------------------------------------------------USER ROUTES--------------------------------------------------------"""
+@bp_main.route('/user/dashboard')
 @login_required
-@admin_required
-def view_chapters():
-    return "Chapters view"
-
-@bp_main.route('/admin/quizzes')
-@login_required
-@admin_required
-def view_quizzes():
-    return "All Quizzes"
-
-@bp_main.route('/admin/users')
-@login_required
-@admin_required
-def view_users():
-    return "All Users"
-
-
-
+def user_dashboard():
+    return render_template("user_templates/user_dashboard.html", user=current_user)
 

@@ -5,6 +5,9 @@ const { createApp, ref, onMounted, computed } = Vue;
             const panelOpen=ref(false);
             const subjects=ref([]);
 
+            const error=ref("");
+            const success=ref("");
+
             const PanelHeight=150; 
 
             function togglePanel(){
@@ -28,6 +31,28 @@ const { createApp, ref, onMounted, computed } = Vue;
                 marginTop: panelOpen.value ? PanelHeight + 'px' : '0px'
             }));
 
-            return { panelOpen, togglePanel, subjects, contentCalc };
+            const confirmDelete=async (sub_id) => {
+                const sure=confirm("Are you sure? This will delete subject and all related chapters, quizzes, questions and data");
+                if(!sure) return;
+                
+                try {
+                    await axios.delete(`/api/subjects/crud/${sub_id}`);
+                    success.value="Subject deleted successfully!";
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 800);
+                } catch(err) {
+                    error.value=err;
+                }
+            };
+
+            window.addEventListener("pageshow", function (event) {
+                if (event.persisted) {
+                    window.location.reload();
+                }
+            });
+
+            return { panelOpen, togglePanel, subjects, contentCalc, confirmDelete, error, success };
         }
     }).mount('#app');

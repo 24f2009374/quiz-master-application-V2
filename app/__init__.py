@@ -35,16 +35,16 @@ def create_app():
         create_admin_account()
 
     
-    api.add_resource(Users, '/api/users/')
+    api.add_resource(Users, '/api/users/', '/api/users/<int:user_id>')
     api.add_resource(Register, '/api/register')
     api.add_resource(Login, '/api/login')
-    api.add_resource(DB_Subjects, '/api/subjects/crud')
+    api.add_resource(DB_Subjects, '/api/subjects/crud', '/api/subjects/crud/<int:sub_id>')
     api.add_resource(SubjectDetail, '/api/subjects/<int:sub_id>')
-    api.add_resource(DB_Chapters, '/api/subjects/<int:sub_id>/chapters/crud')
+    api.add_resource(DB_Chapters, '/api/subjects/<int:sub_id>/chapters/crud', '/api/subjects/<int:sub_id>/chapters/crud/<int:chap_id>')
     api.add_resource(ChapterDetail, '/api/chapters/<int:chap_id>')
-    api.add_resource(DB_Quizzes, '/api/chapters/<int:chap_id>/quizzes/crud')
+    api.add_resource(DB_Quizzes, '/api/chapters/<int:chap_id>/quizzes/crud', '/api/chapters/<int:chap_id>/quizzes/crud/<int:quiz_id>')
     api.add_resource(QuizDetail, '/api/quizzes/<int:quiz_id>')
-    api.add_resource(DB_Questions, '/api/quizzes/<int:quiz_id>/questions/crud')
+    api.add_resource(DB_Questions, '/api/quizzes/<int:quiz_id>/questions/crud', '/api/quizzes/<int:quiz_id>/questions/crud/<int:q_id>')
     api.add_resource(QuestionDetail, '/api/questions/<int:q_id>')
 
 

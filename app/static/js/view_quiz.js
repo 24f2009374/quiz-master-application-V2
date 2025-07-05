@@ -6,6 +6,26 @@ createApp({
         const total=ref(0);
         let ques; let i;
 
+        const error=ref("");
+        const success=ref("");
+
+        const confirmDelete=async (q_id) => {
+            const sure=confirm("Are you sure? This will delete the question");
+            if(!sure) return;
+            
+            try {
+                await axios.delete(`/api/quizzes/${quizObj.value.id}/questions/crud/${q_id}`);
+                success.value="Subject deleted successfully!";
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+            } catch(err) {
+                error.value=err;
+            }
+        };
+
+
         const goBack = () => {
                     window.history.back();
                 };
@@ -38,6 +58,7 @@ createApp({
                 console.log(total.value)
             }
 
+        
             window.addEventListener("pageshow", function (event) {
                 if (event.persisted) {
                     window.location.reload();
@@ -46,7 +67,7 @@ createApp({
 
         });
 
-        return { quizObj, Questions, goBack, total };
+        return { quizObj, Questions, goBack, total, confirmDelete, success, error };
 
 
     }

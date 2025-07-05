@@ -4,6 +4,19 @@
 
 {%block content%}
 <div class="container mt-4" id="app">
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: {% raw %} {{ error }} {% endraw %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            Success:{% raw %} {{ success }} {% endraw %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
     <div>
         <button @click="goBack" class="btn btn-secondary">← Back</button>
     </div>
@@ -36,20 +49,11 @@
                                 </button>
                             </div>
                             <div class="col">
-                                <form action="#" method="POST">
-                                    <button class="btn btn-danger mx-1 btn-sm" title="Delete">
-                                        <input type="hidden" name="next" value="{{ request.url }}">
-                                        <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">Delete
-                                    </button>
-                                </form>
+                               <button class="btn btn-sm btn-danger" @click="confirmDelete(quiz.id)">
+                                    <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">Delete
+                                </button>
                             </div>
                         </div>
-                    
-                        
-
-
-                        
-
                     </div>
                 </div>
             </div>
