@@ -3,16 +3,25 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Api
 from flask_login import LoginManager
+from flask_caching import Cache
+
 
 db=SQLAlchemy()
 login_manager=LoginManager()
+cache=Cache()
 
 def create_app():
     app=Flask(__name__)
+
     app.config['SECRET_KEY']='8b027a0ff5f1320f'
     app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///quizmaster.db'
-    
 
+    app.config['CACHE_TYPE']='RedisCache'
+    app.config['CACHE_REDIS_HOST']='localhost'
+    app.config['CACHE_REDIS_PORT']=6379
+    app.config['CACHE_DEFAULT_TIMEOUT']=300  
+
+    cache.init_app(app)
     db.init_app(app)
     api=Api(app)
 

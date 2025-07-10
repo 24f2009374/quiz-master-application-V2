@@ -10,11 +10,57 @@
 
 <div class="container mt-4" id="app" data-user-id="{{ current_user.user_id }}">
     <h3>To add</h3>
-        Enrollment setup
-        all Quizzes
-        all enrollments
-        quiz itself
-        scorecard / user-self
+    <ul>
+        <li>Enrollment setup</li>
+        <li>all Quizzes</li>
+        <li>all enrollments</li>
+        <li>quiz itself</li>
+        <li>scorecard / user-self</li>
+    </ul>
+
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: {% raw %} {{ error }} {% endraw %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            Success:{% raw %} {{ success }} {% endraw %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    
+    <div v-if="!Enrollments.length" class="text-center text-muted w-100">
+        <p style="color: white;">No Enrollments Yet? </p><a :href="'/admin/quizzes/' + quizObj.id + '/questions/create'">View Enrollments</a>
+    </div>
+    <!--class="col-12 col-sm-6 col-md-4"-->
+    <div class="row">
+        <div v-for="(enroll, ind) in Enrollments">
+                <div class="card text-bg-secondary border-black" style=" margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 500px;">
+                    <div class="card-body border-black">
+                        <div class="row">
+                            <div class="col"><h5 class="card-title"> TBA </h5></div>
+                            <div class="col" style="text-align: right; font-size: 20px;">TBA</div>
+                             
+                        </div>
+                        <ul>
+                            <div class="mb-4" v-for="opt in ques.options">
+                                <li>TBA</li>
+                            </div>
+                        </ul>
+                        <br>
+                        <div class="col">TBA</div>
+                    </div>
+                    <div class="card-footer border-black"> 
+                        <button class="btn btn-primary mx-1 btn-sm" title="Enroll">
+                            <a href="#">Enroll</a>  
+                        </button>           
+                    </div>
+                </div>
+            </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -25,6 +71,7 @@
     createApp({
         setup(){
             const userObj=ref({});
+            const Enrollments=ref([]);
 
             const userId = document.getElementById('app').dataset.userId;
             
@@ -36,7 +83,7 @@
 
 
             
-            return { userId, userObj,name }
+            return { userObj, Enrollments }
         }
     }).mount("#app")
 </script>
