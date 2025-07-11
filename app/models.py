@@ -83,7 +83,8 @@ class Scores(db.Model):
     sid=db.Column(db.Integer, primary_key=True, autoincrement=True)
     quiz_id=db.Column(db.Integer, db.ForeignKey('quiz.quiz_id'), nullable=False)
     user_id=db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    attempt_stamp=db.Column(db.Integer, nullable=False)
+    attempt_start=db.Column(db.DateTime, nullable=False)
+    attempt_end=db.Column(db.DateTime, nullable=False)
     total_scored=db.Column(db.Integer, nullable=False)
 
 class Enrollments(db.Model): #when enro button is pressed on quiz, it adds a student and quiz id related entry to the table and is used to display the quiz for the user

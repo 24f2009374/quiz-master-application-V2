@@ -6,14 +6,42 @@
 {% block user %}{{user.username}}{% endblock %}
 
 {% block content %}
-<div class="container mt-4" id="app">
+<div class="container mt-4 v-cloak" id="app">
+        <div class="container">
+            <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                Error: {% raw %} {{ error }} {% endraw %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
 
+        <div class="container">
+            <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+                Success:{% raw %} {{ success }} {% endraw %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
+            <div class="text-center">
+                <h2 class="my-3" style="padding-top: 15px;">Attempt Quiz</h2>
+                <p class="lead">Are you Prepared?</p>
+                <p class="lead">Chapter: {% raw %}{{ QuizObj.parent }}{% endraw %}</p>
+                <p class="lead">Quiz: {% raw %}{{ QuizObj.name }}{% endraw %}</p>
+            </div>
+            <div class="row justify-content-center my-3">
+                <div class="col-lg-6 mx-auto">
+                    <p>Alloted Time: {% raw %}{{ QuizObj.time }}{% endraw %} Minutes</p>
+                    <p>Alloted Marks: {% raw %}{{ QuizObj.total }}{% endraw %}</p>
+                    <button class="btn btn-warning mx-1 btn-sm" title="Attempt">
+                        <a :href="'/user/attempt/'+QuizObj.id" style="height: 25px; width: 25px;">Attempt Quiz</a>
+                    </button>
+                </div>
+            </div>
+        </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!--<script src="{{ url_for('static', filename='js/view_quiz.js') }}"></script>  -->
-<script>
-    
-</script>
+<script src="{{ url_for('static', filename='js/prep.js') }}"></script>
+
 {% endblock %}

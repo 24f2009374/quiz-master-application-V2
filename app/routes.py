@@ -432,9 +432,19 @@ class Preparation(Resource):
         marks=0
         for q in questions:
             marks+=q.marks
+        chap_name=Chapter.query.filter_by(chap_id=quiz.chapter_id).first().chap_name
 
-        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":quiz.chapter_id, 'total':marks}
+        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":chap_name, 'total':marks}
 
+class AttemptQuiz(Resource):
+    method_decorators=[login_required]
+    def get(self, quiz_id):
+        pass
+
+class SubmitQuiz(Resource):
+    method_decorators=[login_required]
+    def post(self):
+        pass
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
 @bp_main.route('/')
@@ -565,5 +575,10 @@ def to_enroll():
 @login_required
 def prep(quiz_id):
     return render_template("user_templates/prep.html", user=current_user)
+
+@bp_main.route('/user/attempt/<int:quiz_id>')
+@login_required
+def attempt(quiz_id):
+    return render_template("user_templates/AttemptQuiz.html", user=current_user)
 
 

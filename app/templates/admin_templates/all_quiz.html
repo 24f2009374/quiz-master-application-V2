@@ -58,28 +58,9 @@
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<!--<script src="{{ url_for('static', filename='js/view_quiz.js') }}"></script>  -->
+<script src="{{ url_for('static', filename='js/all_quiz.js') }}"></script>
 <script>
-    const { createApp, ref, onMounted }=Vue;
-    createApp({
-        setup(){
-            const Quizzes=ref([]);
-
-            const error=ref("");
-            const success=ref("");
-
-            onMounted(async () => {
-                try {
-                    const response=await axios.get('/api/quizzes');
-                    Quizzes.value=response.data
-                } catch(err) {
-                    error.value=err.response.data.error
-                }
-            });
-
-            return { Quizzes, error, success }
-        }
-    }).mount("#app")
+    
 </script>
 {% endblock %}
 
