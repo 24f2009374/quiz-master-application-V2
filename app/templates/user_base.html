@@ -31,11 +31,12 @@
     </style>
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <nav class="navbar navbar-expand-lg navbar-custom px-4"  style="border-bottom: solid 5px transparent; border-image: linear-gradient(to right, rgb(16, 24, 134), rgb(43, 50, 150)); border-image-slice: 1;">
         <div class="container-fluid">
             <!--Left Links-->
             <div class="navbar-nav me-auto">
-                <a class="nav-link" href="#">View All Quizzes</a>
+                <a class="nav-link" href="/user/to_enroll">View All Quizzes</a>
                 <a class="nav-link" href="#">View Enrolled Quizzes</a>
                 <a class="nav-link" href="#">View Quiz Scores</a>
                 <a class="nav-link" href="{{ url_for('main.user_dashboard') }}">To Dashboard</a>
@@ -48,7 +49,9 @@
 
             <!-- Right side: -->
             <div class="d-flex align-items-center gap-3">
-                <span class="text-white">Welcome, {% block user %}{% endblock %}</span>
+                <div id="user-greeting" class="text-light">
+                Welcome, <span v-if="user">{% block user %}{% endblock %}</span>
+                </div>                
                 <a class="btn btn-sm btn-danger" href="{{ url_for('main.logout') }}">Logout</a>
                 <span class="navbar-brand ms-3">QuizMaster</span>
             </div>
@@ -60,6 +63,5 @@
 
         {% endblock %}
     </div>
-
 </body>
 </html>

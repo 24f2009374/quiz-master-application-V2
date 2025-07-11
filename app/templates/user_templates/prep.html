@@ -1,0 +1,19 @@
+{% extends "user_base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block links %}{% endblock %}
+
+{% block user %}{{user.username}}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="app">
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!--<script src="{{ url_for('static', filename='js/view_quiz.js') }}"></script>  -->
+<script>
+    
+</script>
+{% endblock %}

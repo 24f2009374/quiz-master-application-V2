@@ -1,0 +1,84 @@
+{% extends "user_base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block links %}{% endblock %}
+
+{% block user %}{{user.username}}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="app" data-user-id="{{ current_user.user_id }}">
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: {% raw %} {{ error }} {% endraw %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            Success:{% raw %} {{ success }} {% endraw %}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="row row-cols-3">
+        <div v-for="quiz in Quizzes" :key="quiz.id" class="col-md-4 mb-4">
+                <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); height:250px;">
+                    <div class="card-body border-black">
+                        <h4 class="card-title"> Chaper: {% raw %}{{ quiz.parent }}{% endraw %}</h4>
+                        <h5 class="card-text"> {% raw %}{{ quiz.name }}{% endraw %}</h5>
+                        <p class="card-text">Time Allotted: {% raw %}{{ quiz.time }}{% endraw %}</p>
+                        <p class="card-text">Date: {% raw %}{{ quiz.date }}{% endraw %}</p>
+                    </div>
+
+                    <div class="card-footer border-black">
+                        <button class="btn btn-warning mx-1 btn-sm" title="Update" @click="enrollNow(quiz.id)">
+                                Enroll
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<!--<script src="{{ url_for('static', filename='js/view_quiz.js') }}"></script>  -->
+<script>
+    const { createApp, ref, onMounted }=Vue;
+    createApp({
+        setup(){
+            const Quizzes=ref([]);
+            const Enrollments=ref([]);
+            const userId = document.getElementById('app').dataset.userId;
+
+             const error=ref("");
+            const success=ref("");
+
+            onMounted(async () => {
+                try {
+                    const response=await axios.get('/api/quizzes');
+                    Quizzes.value=response.data;
+                    console.log(Quizzes.value)
+                } catch(err) {
+                    console.error(err)
+                }
+            });
+
+            async function enrollNow(quiz_id){
+                try {
+                    const response=await axios.post('/api/enrolls/crud', {user_id:userId, quiz_id:quiz_id})
+                    success.value=response.data.message
+                    console.log("working")
+                } catch(err) {
+                    console.log(err)
+                    error.value = err.response.data.error;
+                }
+            }
+
+            return { Quizzes, userId, enrollNow, error, success}
+
+        }
+    }).mount("#app")
+</script>
+{% endblock %}

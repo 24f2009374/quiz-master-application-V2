@@ -25,6 +25,14 @@ user_args=reqparse.RequestParser()
 user_args.add_argument('username', type=str, required=True, help="Username cannot be blank")
 user_args.add_argument('email', type=str, required=True, help="Email cannot be blank")
 
+class CurrentUser(Resource):
+    @login_required
+    def get(self):
+        return {
+            "user_id": current_user.user_id,
+            "username": current_user.username,
+            "email": current_user.email
+        }
 class Users(Resource):
     def get(self):
         users=User.query.all()
@@ -182,7 +190,6 @@ class DB_Chapters(Resource):
         chap_id=data.get('chap_id')
 
         chapter=Chapter.query.filter_by(chap_id=chap_id).first()
-        print(data)
 
         if not chapter:
             return {"error":"Chapter Not Found"}, 404
@@ -208,9 +215,10 @@ class DB_Chapters(Resource):
 
 class DB_Quizzes(Resource):
     method_decorators=[login_required]
+    
     def get(self, chap_id):
         quizzes=Quiz.query.filter_by(chapter_id=chap_id)
-        return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.isoformat(), 'parent':q.chapter_id} for q in quizzes]
+        return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes]
     
     def post(self, chap_id):
         data=request.get_json()
@@ -354,13 +362,12 @@ class ChapterDetail(Resource):
 
 class QuizDetail(Resource):
     method_decorators=[login_required]
-
     def get(self, quiz_id):
         quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
         if not quiz:
             return {"error":"Quiz Not Found"}, 404
         return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":quiz.chapter_id}
-
+    
 class QuestionDetail(Resource):
     method_decorators=[login_required]
     def get(self, q_id):
@@ -368,6 +375,65 @@ class QuestionDetail(Resource):
         if not q:
             return {"error":"Question Not Found"}, 404
         return {'id':q.qid,'statement':q.question_statement, 'parent':q.quiz_id, 'correct':q.correct_option, 'marks':q.marks, 'options':[q.option_1,q.option_2,q.option_3,q.option_4]}
+
+class AllQuiz(Resource):
+    method_decorators=[login_required]
+    def get(self):
+        quizzes=Quiz.query.all()
+        res=[]
+        for q in quizzes:
+            chap=Chapter.query.filter_by(chap_id=q.chapter_id).first()
+            res.append({'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':chap.chap_name})
+        return res
+    
+class AllChapter(Resource):
+    method_decorators=[login_required]
+    def get(self):
+        chaps=Chapter.query.all()
+        res=[]
+        for c in chaps:
+            p_sub=Subject.query.filter_by(sub_id=c.subject_id).first()
+            res.append({'id':c.chap_id, 'name':c.chap_name, 'desc':c.chap_desc, 'parent':p_sub.sub_name})
+ 
+        return res
+
+#--------------------------------------------USER RESOURCES--------------------------------------------
+class Enrollment(Resource):
+    method_decorators=[login_required]
+    
+    def get(self, user_id):
+        enrolls=Enrollments.query.filter_by(user_id=user_id)
+        quizzes=current_user.enrolled_quizzes
+
+        return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes]
+
+    def post(self):
+        data=request.get_json()
+
+        user_id=data.get("user_id")
+        quiz_id=data.get("quiz_id")
+
+        enroll=Enrollments.query.filter_by(user_id=user_id, quiz_id=quiz_id).first()
+        if enroll:
+            return {"error":"You have Already Enrolled to this Quiz"}, 409
+
+        new_enroll=Enrollments(user_id=user_id, quiz_id=quiz_id)
+        db.session.add(new_enroll)
+        db.session.commit()
+        return {"message": "Successfully Enrolled"}, 201
+        
+class Preparation(Resource):
+    method_decorators=[login_required]
+    def get(self, quiz_id):
+        quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
+        if not quiz:
+            return {"error":"Quiz Not Found"}, 404
+        questions=Questions.query.filter_by(quiz_id=quiz_id)
+        marks=0
+        for q in questions:
+            marks+=q.marks
+
+        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":quiz.chapter_id, 'total':marks}
 
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
@@ -394,6 +460,24 @@ def logout():
 @admin_required
 def admin_dashboard():
     return render_template("admin_templates/admin_dashboard.html")
+
+@bp_main.route('/admin/chapters')
+@login_required
+@admin_required
+def all_chapter():
+    return render_template("admin_templates/all_chapters.html")
+
+@bp_main.route('/admin/quizzes')
+@login_required
+@admin_required
+def all_quiz():
+    return render_template("admin_templates/all_quiz.html")
+
+@bp_main.route('/admin/view_users')
+@login_required
+@admin_required
+def all_user():
+    return render_template("admin_templates/all_user.html")
 
 #--------------------------------------------DB CREATES--------------------------------------------
 
@@ -471,4 +555,15 @@ def view_quiz(quiz_id): #Goes into Chapter to view Quizzes and options
 @login_required
 def user_dashboard():
     return render_template("user_templates/user_dashboard.html", user=current_user)
+
+@bp_main.route('/user/to_enroll')
+@login_required
+def to_enroll():
+    return render_template("user_templates/enroll_quiz.html", user=current_user)
+
+@bp_main.route('/user/preparation/<int:quiz_id>')
+@login_required
+def prep(quiz_id):
+    return render_template("user_templates/prep.html", user=current_user)
+
 
