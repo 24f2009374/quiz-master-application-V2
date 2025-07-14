@@ -34,11 +34,14 @@ class CurrentUser(Resource):
             "username": current_user.username,
             "email": current_user.email
         }
-class Users(Resource):
+
+class AllUsers(Resource):
     def get(self):
         users=User.query.all()
-        return [u.to_dict() for u in users], 200
+        res=[u.to_dict() for u in users]
+        return res[1:], 200
     
+class Users(Resource):
     def get(self, user_id):
         user=User.query.filter_by(user_id=user_id).first()
         return user.to_dict(), 200
@@ -491,6 +494,21 @@ class Score(Resource):
             marks+=q.marks
         return [{'scored':s.total_scored, 'start':s.attempt_start.isoformat(), 'end':s.attempt_end.isoformat(), 'total':marks, 'id':s.sid} for s in scores]
 
+class UserScores(Resource):
+    method_decorators=[login_required]
+    def get(self, user_id):
+        user=User.query.filter_by(user_id=user_id).first()
+        scores=Scores.query.filter_by(user_id=user_id).all()
+        res=[]
+        for s in scores:
+            quiz=Quiz.query.filter_by(quiz_id=s.quiz_id).first()
+            questions=Questions.query.filter_by(quiz_id=quiz.quiz_id).all()
+            marks=0
+            for q in questions:
+                marks+=q.marks
+            res.append({'scored':s.total_scored, 'start':s.attempt_start.isoformat(), 'end':s.attempt_end.isoformat(), 'total':marks, 'id':s.sid, 'quiz':quiz.quiz_name})
+        return res, 200
+
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
 @bp_main.route('/')
@@ -605,6 +623,18 @@ def view_chapter(chap_id): #Goes into Chapter to view Quizzes and options
 @admin_required
 def view_quiz(quiz_id): #Goes into Chapter to view Quizzes and options
     return render_template('admin_templates/view_quiz.html')
+
+@bp_main.route('/admin/users/')
+@login_required
+@admin_required
+def view_users(): 
+    return render_template('admin_templates/view_users.html')
+
+@bp_main.route('/admin/users/<int:user_id>')
+@login_required
+@admin_required
+def view_user_data(user_id): #Goes into Chapter to view Quizzes and options
+    return render_template('admin_templates/view_user_data.html')
 
 """--------------------------------------------------------USER ROUTES--------------------------------------------------------"""
 @bp_main.route('/user/dashboard')

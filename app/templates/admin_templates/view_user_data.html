@@ -1,0 +1,66 @@
+{% extends "admin_base.html" %}
+
+{% block title %}View User Data{% endblock %}
+
+{%block content%}
+<div class="container mt-4" id="app" v-cloak>
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: {% raw %} {{ error }} {% endraw %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); height:150px;">
+        <div class="card-body border-black">
+            <h5 class="card-title"> Name: {% raw %}{{ user.username }}{% endraw %}</h5>
+            <p class="card-text">Email: {% raw %}{{ user.email }}{% endraw %}</p>
+            
+        </div>
+    </div>
+
+    <div v-if="!scores.length" class="text-center text-muted w-100">
+        <p style="color: white;">No Attempts </p>
+    </div>
+
+    <div>
+        <ul class="list-group list-group-flush" >
+            <li class="list-group-item text-bg-secondary border-black" v-for="(s,ind) in scores" :key="s.sid" style="margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
+                <p>Quiz Name: {% raw %} {{ s.quiz }} {% endraw %}</p>
+                <p>Attempt Start: {% raw %} {{ s.start }} {% endraw %}</p>
+                <p>Attempt End: {% raw %} {{ s.end }} {% endraw %}</p>
+                <p>Marks Scores: {% raw %} {{ s.scored }} {% endraw %}/{% raw %} {{ s.total }} {% endraw %}</p>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const { createApp, ref, onMounted }=Vue;
+    createApp({
+        setup(){
+            const user=ref([])
+            const error=ref("")
+            const UID=parseInt(window.location.pathname.split('/').pop());
+            const scores=ref([])
+
+            onMounted(async () => {
+                try{
+                    const response1=await axios.get(`/api/users/${UID}`);
+                    user.value=response1.data;
+
+                    const response2=await axios.get(`/api/users/scores/${UID}`)
+                    scores.value=response2.data
+
+                    console.log(scores.value)
+                } catch(err) {
+                    error.value=err
+                }
+            })
+
+            return {user, error, scores}
+        }
+    }).mount("#app")
+</script>
+{% endblock %}

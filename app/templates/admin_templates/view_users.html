@@ -1,0 +1,55 @@
+{% extends "admin_base.html" %}
+
+{% block title %}View Users{% endblock %}
+
+{%block content%}
+<div class="container mt-4" id="app" v-cloak>
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: {% raw %} {{ error }} {% endraw %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="row row-cols-3">
+        <div v-for="(u,ind) in users" :key="ind" class="col-md-4 mb-4">
+                <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); height:150px;">
+                    <div class="card-body border-black">
+                        <h5 class="card-title"> Name: {% raw %}{{ u.username }}{% endraw %}</h5>
+                        <p class="card-text">Email: {% raw %}{{ u.email }}{% endraw %}</p>
+                        
+                    </div>
+
+                    <div class="card-footer border-black">
+                        <button class="btn btn-warning mx-1 btn-sm" title="Update">
+                            <a :href="'/admin/users/'+u.user_id" class="link-primary">View Data</a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const { createApp, ref, onMounted }=Vue;
+    createApp({
+        setup(){
+            const users=ref([])
+            const error=ref("")
+
+            onMounted(async () => {
+                try{
+                    const response=await axios.get('/api/users');
+                    users.value=response.data;
+                } catch(err) {
+                    error.value=err
+                }
+            })
+
+            return {users, error}
+        }
+    }).mount("#app")
+</script>
+{% endblock %}

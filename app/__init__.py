@@ -30,7 +30,7 @@ def create_app():
     login_manager.login_message_category = "info"
 
 
-    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score
+    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score, AllUsers, UserScores
     from app.models import User
 
     app.register_blueprint(bp_main)
@@ -44,9 +44,11 @@ def create_app():
         create_admin_account()
 
     
-    api.add_resource(Users, '/api/users/', '/api/users/<int:user_id>')
+    api.add_resource(Users, '/api/users/<int:user_id>')
+    api.add_resource(AllUsers,'/api/users/')
     api.add_resource(Register, '/api/register')
     api.add_resource(Login, '/api/login')
+    api.add_resource(UserScores, '/api/users/scores/<int:user_id>')
 
     api.add_resource(DB_Subjects, '/api/subjects/crud', '/api/subjects/crud/<int:sub_id>')
     api.add_resource(SubjectDetail, '/api/subjects/<int:sub_id>')
