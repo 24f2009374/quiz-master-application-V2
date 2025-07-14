@@ -22,7 +22,7 @@ const { createApp, ref, onMounted } = Vue;
                         form.value.sub_text=response.data.desc;
 
                     } catch(err) {
-                        error.value=err;
+                        error.value=err.response.data.error;
                     }
                     
                 })

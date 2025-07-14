@@ -1,0 +1,24 @@
+{% extends "user_base.html" %}
+
+{% block title %}Thank you!{% endblock %}
+{% block links %}{% endblock %}
+
+{% block user %}{{user.username}}{% endblock %}
+
+{% block content %}
+<div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
+            <div class="text-center">
+                <h2 class="my-3" style="padding-top: 15px;">Thank You!</h2>
+                
+            </div>
+            <div class="row justify-content-center my-3">
+                <div class="col-lg-6 mx-auto">
+                    <p>Your Quiz has been Submitted Successfully</p>
+                    <p>Return to Dashboard to View Score</p>
+                    <button class="btn btn-primary mx-1 btn-sm" title="Attempt">
+                        <a href="{{ url_for('main.user_dashboard') }}" style="height: 25px; width: 25px;" class="link-underline-info link-opacity-75-hover link-info">Back to Dashboard</a>
+                    </button>
+                </div>
+            </div>
+        </div>
+{% endblock %}

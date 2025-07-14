@@ -32,6 +32,7 @@
                 <div class="col-lg-6 mx-auto">
                     <p>Alloted Time: {% raw %}{{ QuizObj.time }}{% endraw %} Minutes</p>
                     <p>Alloted Marks: {% raw %}{{ QuizObj.total }}{% endraw %}</p>
+                    <p>Attempt Number: {% raw %}{{ QuizObj.count }}{% endraw %}</p>
                     <button class="btn btn-warning mx-1 btn-sm" title="Attempt">
                         <a :href="'/user/attempt/'+QuizObj.id" style="height: 25px; width: 25px;">Attempt Quiz</a>
                     </button>

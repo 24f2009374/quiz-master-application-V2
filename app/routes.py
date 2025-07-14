@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
 from flask_login import login_required, current_user, logout_user, login_user, login_manager
 import datetime
+from dateutil.parser import parse
 
 bp_main=Blueprint('main',__name__)
 
@@ -426,6 +427,7 @@ class Preparation(Resource):
     method_decorators=[login_required]
     def get(self, quiz_id):
         quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
+        user_id=current_user.user_id
         if not quiz:
             return {"error":"Quiz Not Found"}, 404
         questions=Questions.query.filter_by(quiz_id=quiz_id)
@@ -434,17 +436,61 @@ class Preparation(Resource):
             marks+=q.marks
         chap_name=Chapter.query.filter_by(chap_id=quiz.chapter_id).first().chap_name
 
-        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":chap_name, 'total':marks}
+        scores=Scores.query.filter_by(quiz_id=quiz_id, user_id=user_id).all()
+        counts=0
+        for _ in scores:
+            counts+=1
+
+
+        return {"id": quiz.quiz_id, "name": quiz.quiz_name, "time":quiz.time, "date":quiz.date.strftime('%Y-%m-%d'), "parent":chap_name, 'total':marks, 'count':counts}
 
 class AttemptQuiz(Resource):
+    #packages questions excluding correct option and also sends the quiz time which will be used in timer
     method_decorators=[login_required]
     def get(self, quiz_id):
-        pass
+        quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
+        if not quiz:
+            return {"error": "Quiz not found"}, 404
+        
+        questions = Questions.query.filter_by(quiz_id=quiz_id).all()
+        result=[]
+        for q in questions:
+            options=q.get_options()
+            result.append({"id":q.qid, "question":q.question_statement, "options":options, "marks":q.marks})
+        return {"questions": result, "quiz_time": quiz.time}, 200
 
 class SubmitQuiz(Resource):
     method_decorators=[login_required]
     def post(self):
-        pass
+        data=request.get_json()
+        quiz_id = data.get('quiz_id')
+        answers = data.get('answers')
+        att_start = parse(data.get('att_start'))
+        att_end = parse(data.get('att_end'))
+        user_id = current_user.user_id
+
+        questions = Questions.query.filter_by(quiz_id=quiz_id).all()
+        total_score=0
+
+        for q,slct in zip(questions, answers):
+            if slct is not None and slct==q.correct_option:
+                total_score+=q.marks
+
+        score=Scores(user_id=user_id, quiz_id=quiz_id, attempt_start=att_start, attempt_end=att_end, total_scored=total_score)
+        db.session.add(score)
+        db.session.commit()
+        return {'message': 'Quiz Successfully Submitted'}, 201
+
+class Score(Resource):
+    method_decorators=[login_required]
+    def get(self, quiz_id):
+        scores=Scores.query.filter_by(quiz_id=quiz_id, user_id=current_user.user_id).all()
+        questions=Questions.query.filter_by(quiz_id=quiz_id).all()
+        marks=0
+        for q in questions:
+            marks+=q.marks
+        return [{'scored':s.total_scored, 'start':s.attempt_start.isoformat(), 'end':s.attempt_end.isoformat(), 'total':marks, 'id':s.sid} for s in scores]
+
 #--------------------------------------------MAIN ROUTES--------------------------------------------
 
 @bp_main.route('/')
@@ -580,5 +626,16 @@ def prep(quiz_id):
 @login_required
 def attempt(quiz_id):
     return render_template("user_templates/AttemptQuiz.html", user=current_user)
+
+@bp_main.route('/user/quiz/thank')
+@login_required
+def thank():
+    return render_template("user_templates/quiz_thank.html", user=current_user)
+
+@bp_main.route('/user/scores/<int:quiz_id>')
+@login_required
+def score(quiz_id):
+    return render_template("user_templates/user_score.html", user=current_user)
+
 
 
