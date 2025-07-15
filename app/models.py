@@ -2,6 +2,7 @@ from app import db
 from flask_login import UserMixin
 from app import login_manager
 from werkzeug.security import check_password_hash, generate_password_hash
+from app import cache
 
 
 
@@ -25,6 +26,7 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    @cache.cached(timeout=400, key_prefix='user_dict')
     def to_dict(self):
         return {
             "user_id": self.user_id,

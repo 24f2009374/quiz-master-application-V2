@@ -47,10 +47,10 @@
                 <input class="form-control form-control-sm" type="search" placeholder="Search (Coming Soon)" aria-label="Search" disabled>
             </form>
 
-            <!-- Right side: -->
+            <!-- Right side: --> <!--{% block user %}{% endblock %}-->
             <div class="d-flex align-items-center gap-3">
                 <div id="user-greeting" class="text-light">
-                Welcome, <span v-if="user">{% block user %}{% endblock %}</span>
+                Welcome, <span>{{user.username}}</span>
                 </div>                
                 <a class="btn btn-sm btn-danger" href="{{ url_for('main.logout') }}">Logout</a>
                 <span class="navbar-brand ms-3">QuizMaster</span>
@@ -63,5 +63,28 @@
 
         {% endblock %}
     </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        //const { createApp, ref, onMounted }=Vue;
+        createApp({
+            setup(){
+                const user=ref({})
+
+                onMounted(async () => {
+                    try {
+                        const response=await axios.get('/api/users/me')
+                        console.log(response.data)
+                        user.value-response.data
+                    } catch(err) {
+                        console.log(err)
+                    }
+                })
+
+                return {user}
+            }
+        }).mount("#user-greeting");
+    </script>
 </body>
 </html>

@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_restful import Api
 from flask_login import LoginManager
 from flask_caching import Cache
+from .mail import init_mail
 
 
 db=SQLAlchemy()
@@ -13,24 +14,28 @@ cache=Cache()
 def create_app():
     app=Flask(__name__)
 
-    app.config['SECRET_KEY']='8b027a0ff5f1320f'
-    app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///quizmaster.db'
-
-    app.config['CACHE_TYPE']='RedisCache'
-    app.config['CACHE_REDIS_HOST']='localhost'
-    app.config['CACHE_REDIS_PORT']=6379
-    app.config['CACHE_DEFAULT_TIMEOUT']=300  
+    app.config.update(
+        SECRET_KEY='8b027a0ff5f1320f',
+        SQLALCHEMY_DATABASE_URI='sqlite:///quizmaster.db',
+        CELERY_BROKER_URL='redis://localhost:6379/0',
+        CELERY_RESULT_BACKEND='redis://localhost:6379/0',
+        CACHE_TYPE='RedisCache',
+        CACHE_REDIS_HOST='localhost',
+        CACHE_REDIS_PORT=6379,
+        CACHE_DEFAULT_TIMEOUT=300
+    )
 
     cache.init_app(app)
     db.init_app(app)
     api=Api(app)
+    init_mail(app)
 
     login_manager.init_app(app)
     login_manager.login_view="main.login"
     login_manager.login_message_category = "info"
 
 
-    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score, AllUsers, UserScores
+    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score, AllUsers, UserScores, CurrentUser
     from app.models import User
 
     app.register_blueprint(bp_main)
@@ -49,6 +54,7 @@ def create_app():
     api.add_resource(Register, '/api/register')
     api.add_resource(Login, '/api/login')
     api.add_resource(UserScores, '/api/users/scores/<int:user_id>')
+    api.add_resource(CurrentUser, '/api/users/me')
 
     api.add_resource(DB_Subjects, '/api/subjects/crud', '/api/subjects/crud/<int:sub_id>')
     api.add_resource(SubjectDetail, '/api/subjects/<int:sub_id>')
@@ -84,3 +90,6 @@ def create_admin_account():
         db.session.add(admin) 
         db.session.commit()
         print("admin created and indexed with username (admin@quizmaster.com) and password (admin123)")
+
+
+flask_app = create_app()

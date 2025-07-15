@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from app import db, Api
+from app import db, Api, cache
 from app.models import User, Subject, Chapter, Quiz, Questions, Scores, Enrollments
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,9 +7,22 @@ from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
 from flask_login import login_required, current_user, logout_user, login_user, login_manager
 import datetime
 from dateutil.parser import parse
+from app.mail import send_test_mail
 
 bp_main=Blueprint('main',__name__)
 
+"""Start Redis: sudo service redis-server start  
+View Keys: redis-cli; keys *      """
+#--------------------------------------------MAIL TESTS--------------------------------------------
+@bp_main.route('/send-test-mail')
+@login_required
+def test_mail():
+    send_test_mail(
+        subject="Hello from QuizMaster",
+        recipients=["neal@neal.com"],
+        body="This is just a test email via MailHog."
+    )
+    return "Mail sent! Check MailHog."
 #--------------------------------------------ADMIN WRAPPER--------------------------------------------
 def admin_required(f):
     @wraps(f)
@@ -28,6 +41,7 @@ user_args.add_argument('email', type=str, required=True, help="Email cannot be b
 
 class CurrentUser(Resource):
     @login_required
+    @cache.cached(timeout=900, key_prefix='current_user')
     def get(self):
         return {
             "user_id": current_user.user_id,
@@ -36,6 +50,7 @@ class CurrentUser(Resource):
         }
 
 class AllUsers(Resource):
+    @cache.cached(timeout=900, key_prefix='all_users')
     def get(self):
         users=User.query.all()
         res=[u.to_dict() for u in users]
@@ -92,7 +107,7 @@ class Login(Resource):
 
 class DB_Subjects(Resource):
     method_decorators=[login_required]
-    
+    @cache.cached(timeout=900, key_prefix='all_subjects')
     def get(self):
         subs=Subject.query.all()
         return [{'id':s.sub_id, 'name':s.sub_name, 'desc':s.sub_desc} for s in subs]
@@ -113,6 +128,7 @@ class DB_Subjects(Resource):
         new_sub= Subject(sub_name=sub_name, sub_desc=sub_desc)
         db.session.add(new_sub)
         db.session.commit()
+        cache.delete('all_subjects')
 
         return {'message': 'Subject created successfully'}, 201
 
@@ -132,6 +148,7 @@ class DB_Subjects(Resource):
         sub.sub_desc=sub_desc
 
         db.session.commit()
+        cache.delete('all_subjects')
 
         return {'message': 'Subject updated successfully'}, 200
     
@@ -159,10 +176,12 @@ class DB_Subjects(Resource):
         db.session.delete(subject)
 
         db.session.commit()
+        cache.delete('all_subjects')
         return {'message': 'Subject and all related data deleted successfully.'}, 200
    
 class DB_Chapters(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='child_chaps')
     def get(self, sub_id):
         chaps=Chapter.query.filter_by(subject_id=sub_id)
         return [{'id':c.chap_id, 'name':c.chap_name, 'desc':c.chap_desc, 'parent':c.subject_id} for c in chaps]
@@ -184,6 +203,8 @@ class DB_Chapters(Resource):
         new_chap= Chapter(chap_name=chap_name, chap_desc=chap_desc, subject_id=sub_id)
         db.session.add(new_chap)
         db.session.commit()
+        cache.delete('child_chaps')
+        cache.delete('all_chap')
 
         return {'message': 'Chapter created successfully'}, 201
     
@@ -201,6 +222,8 @@ class DB_Chapters(Resource):
         chapter.chap_name=chap_name
         chapter.chap_desc=chap_desc
         db.session.commit()
+        cache.delete('child_chaps')
+        cache.delete('all_chap')
         return {'message': 'Chapter updated successfully'}, 200
     
     def delete(self, sub_id, chap_id):
@@ -214,12 +237,13 @@ class DB_Chapters(Resource):
 
         db.session.delete(chapter)
         db.session.commit()
-
+        cache.delete('child_chaps')
+        cache.delete('all_chap')
         return {'message': 'Chapter and all related data deleted successfully.'}, 200
 
 class DB_Quizzes(Resource):
     method_decorators=[login_required]
-    
+    @cache.cached(timeout=900, key_prefix='child_quiz')
     def get(self, chap_id):
         quizzes=Quiz.query.filter_by(chapter_id=chap_id)
         return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes]
@@ -244,6 +268,8 @@ class DB_Quizzes(Resource):
         new_quiz=Quiz(quiz_name=quiz_name, date=date_obj, time=time, chapter_id=chap_id)
         db.session.add(new_quiz)
         db.session.commit()
+        cache.delete('child_quiz')
+        cache.delete('all_quiz')
 
         return {'message': 'Quiz created successfully'}, 201
     
@@ -265,6 +291,8 @@ class DB_Quizzes(Resource):
         quiz.time=time
         quiz.date=date_obj
         db.session.commit()
+        cache.delete('child_quiz')
+        cache.delete('all_quiz')
         return {'message': 'Quiz updated successfully'}, 200
     
     def delete(self, chap_id, quiz_id):
@@ -274,11 +302,14 @@ class DB_Quizzes(Resource):
         Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
         db.session.delete(quiz)
         db.session.commit()
+        cache.delete('child_quiz')
+        cache.delete('all_quiz')
 
         return {'message': 'Quiz and all related data deleted successfully.'}, 200
 
 class DB_Questions(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='child_ques')
     def get(self, quiz_id):
         questions=Questions.query.filter_by(quiz_id=quiz_id)
         return [{'id':q.qid,'statement':q.question_statement, 'parent':q.quiz_id, 'correct':q.correct_option, 'marks':q.marks, 'options':[q.option_1,q.option_2,q.option_3,q.option_4]} for q in questions]
@@ -313,7 +344,7 @@ class DB_Questions(Resource):
                            marks=marks)
         db.session.add(new_ques)
         db.session.commit()
-
+        cache.delete('child_ques')
         return {'message': 'Question created successfully'}, 201
     
     def put(self, quiz_id):
@@ -337,13 +368,14 @@ class DB_Questions(Resource):
         ques.option_3=options[2] if options[2] else None 
         ques.option_4=options[3] if options[3] else None
         db.session.commit()
+        cache.delete('child_ques')
         return {'message': 'Question updated successfully'}, 200
 
     def delete(self, quiz_id, q_id):
 
         Questions.query.filter_by(qid=q_id).delete()
         db.session.commit()
-
+        cache.delete('child_ques')
         return {'message': 'Question deleted successfully.'}, 200
 
 #--------------------------------------------HEIRARCHIAL VIEW RESOURCES--------------------------------------------
@@ -382,6 +414,7 @@ class QuestionDetail(Resource):
 
 class AllQuiz(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='all_quiz')
     def get(self):
         quizzes=Quiz.query.all()
         res=[]
@@ -392,6 +425,7 @@ class AllQuiz(Resource):
     
 class AllChapter(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='all_chap')
     def get(self):
         chaps=Chapter.query.all()
         res=[]
@@ -404,7 +438,7 @@ class AllChapter(Resource):
 #--------------------------------------------USER RESOURCES--------------------------------------------
 class Enrollment(Resource):
     method_decorators=[login_required]
-    
+    @cache.cached(timeout=900, key_prefix='enroll')
     def get(self, user_id):
         enrolls=Enrollments.query.filter_by(user_id=user_id)
         quizzes=current_user.enrolled_quizzes
@@ -486,6 +520,7 @@ class SubmitQuiz(Resource):
 
 class Score(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='list_score')
     def get(self, quiz_id):
         scores=Scores.query.filter_by(quiz_id=quiz_id, user_id=current_user.user_id).all()
         questions=Questions.query.filter_by(quiz_id=quiz_id).all()
@@ -496,6 +531,7 @@ class Score(Resource):
 
 class UserScores(Resource):
     method_decorators=[login_required]
+    @cache.cached(timeout=900, key_prefix='user_score')
     def get(self, user_id):
         user=User.query.filter_by(user_id=user_id).first()
         scores=Scores.query.filter_by(user_id=user_id).all()
