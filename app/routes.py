@@ -676,32 +676,32 @@ def view_user_data(user_id): #Goes into Chapter to view Quizzes and options
 @bp_main.route('/user/dashboard')
 @login_required
 def user_dashboard():
-    return render_template("user_templates/user_dashboard.html", user=current_user)
+    return render_template("user_templates/user_dashboard.html")
 
 @bp_main.route('/user/to_enroll')
 @login_required
 def to_enroll():
-    return render_template("user_templates/enroll_quiz.html", user=current_user)
+    return render_template("user_templates/enroll_quiz.html")
 
 @bp_main.route('/user/preparation/<int:quiz_id>')
 @login_required
 def prep(quiz_id):
-    return render_template("user_templates/prep.html", user=current_user)
+    return render_template("user_templates/prep.html")
 
 @bp_main.route('/user/attempt/<int:quiz_id>')
 @login_required
 def attempt(quiz_id):
-    return render_template("user_templates/AttemptQuiz.html", user=current_user)
+    return render_template("user_templates/AttemptQuiz.html")
 
 @bp_main.route('/user/quiz/thank')
 @login_required
 def thank():
-    return render_template("user_templates/quiz_thank.html", user=current_user)
+    return render_template("user_templates/quiz_thank.html")
 
 @bp_main.route('/user/scores/<int:quiz_id>')
 @login_required
 def score(quiz_id):
-    return render_template("user_templates/user_score.html", user=current_user)
+    return render_template("user_templates/user_score.html")
 
 
 
