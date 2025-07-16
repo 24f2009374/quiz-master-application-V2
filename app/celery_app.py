@@ -3,9 +3,10 @@ from celery.schedules import crontab
 from app.mail import send_basic_mail
 from app.models import User
 from . import flask_app
+from datetime import datetime, timedelta
 
 def create_celery(app):
-    celery=Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'], backend=app.config['CELERY_RESULT_BACKEND'])
+    celery=Celery(app.import_name)
     celery.conf.update(app.config)
 
     celery.conf.timezone = 'Asia/Kolkata'
@@ -13,10 +14,18 @@ def create_celery(app):
 
     celery.conf.beat_schedule = {
         "daily-reminders":{
-            'task':'app.tasks.daily_reminder_all',
+            'task':'app.celery_app.daily_reminder_all',
             'schedule':crontab(hour=7, minute=0),
         },
     }
+
+    #USE FOR TEST AND SHOWING CELERY FUNCTIONAITY
+    """celery.conf.beat_schedule = {
+        'heartbeat-every-10s': {
+        'task': 'debug_heartbeat',
+        'schedule': 10.0,
+        },
+    }"""
 
 
     class ContextTask(celery.Task):
@@ -54,5 +63,14 @@ def post_quiz_mail(email, username, end_stamp, quiz_name):
         recipients=[email],
         body=f"Hello {username}, your attempt of quiz, {quiz_name}, has been submitted successfully.\nTime Stamp: {end_stamp}\nPlease refer to dashboard for Results"
     )
+@celery.task(name='debug_heartbeat')
+def debug_heartbeat():
+    print("Heartbeat:", datetime.now())
+    send_basic_mail(
+        subject="TEST",
+        recipients=["neal@neal.com"],
+        body="SEND EVERY 10S"
+    )
 
+    
         

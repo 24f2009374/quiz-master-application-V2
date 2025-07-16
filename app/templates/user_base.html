@@ -50,7 +50,7 @@
             <!-- Right side: --> <!--{% block user %}{% endblock %}-->
             <div class="d-flex align-items-center gap-3">
                 <div id="user-greeting" class="text-light">
-                Welcome, <span>{{user.username}}</span>
+                Welcome,&nbsp;<span v-if="user" v-text="user.username"></span>
                 </div>                
                 <a class="btn btn-sm btn-danger" href="{{ url_for('main.logout') }}">Logout</a>
                 <span class="navbar-brand ms-3">QuizMaster</span>
@@ -70,13 +70,12 @@
         //const { createApp, ref, onMounted }=Vue;
         createApp({
             setup(){
-                const user=ref({})
+                const user=ref("")
 
                 onMounted(async () => {
                     try {
                         const response=await axios.get('/api/users/me')
-                        console.log(response.data)
-                        user.value-response.data
+                        user.value=response.data
                     } catch(err) {
                         console.log(err)
                     }

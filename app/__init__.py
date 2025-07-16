@@ -17,8 +17,8 @@ def create_app():
     app.config.update(
         SECRET_KEY='8b027a0ff5f1320f',
         SQLALCHEMY_DATABASE_URI='sqlite:///quizmaster.db',
-        CELERY_BROKER_URL='redis://localhost:6379/0',
-        CELERY_RESULT_BACKEND='redis://localhost:6379/0',
+        broker_url='redis://localhost:6379/0',
+        result_backend='redis://localhost:6379/0',
         CACHE_TYPE='RedisCache',
         CACHE_REDIS_HOST='localhost',
         CACHE_REDIS_PORT=6379,

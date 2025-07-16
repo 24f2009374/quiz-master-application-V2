@@ -17,8 +17,8 @@ Start Redis: sudo service redis-server start
 View Keys: redis-cli; keys *  
 
 Terminal 1: redis-server #6379
-Terminal 2: celery -A app.celery_app.celery worker --loglevel=info
-Terminal 3: celery -A app.celery_app.celery beat --loglevel info
+Terminal 2: celery -A app.celery_app worker --loglevel=info
+Terminal 3: celery -A app.celery_app beat --loglevel info
 """
 #--------------------------------------------MAIL TESTS--------------------------------------------
 @bp_main.route('/send-basic-mail')
