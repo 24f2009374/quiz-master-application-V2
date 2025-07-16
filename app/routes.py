@@ -7,17 +7,24 @@ from flask_restful import Resource, Api, reqparse, fields, marshal_with, abort
 from flask_login import login_required, current_user, logout_user, login_user, login_manager
 import datetime
 from dateutil.parser import parse
-from app.mail import send_test_mail
+from app.mail import send_basic_mail
+#from app.celery_app import registration_mail, post_quiz_mail
 
 bp_main=Blueprint('main',__name__)
 
-"""Start Redis: sudo service redis-server start  
-View Keys: redis-cli; keys *      """
+"""
+Start Redis: sudo service redis-server start  
+View Keys: redis-cli; keys *  
+
+Terminal 1: redis-server #6379
+Terminal 2: celery -A app.celery_app.celery worker --loglevel=info
+Terminal 3: celery -A app.celery_app.celery beat --loglevel info
+"""
 #--------------------------------------------MAIL TESTS--------------------------------------------
-@bp_main.route('/send-test-mail')
+@bp_main.route('/send-basic-mail')
 @login_required
 def test_mail():
-    send_test_mail(
+    send_basic_mail(
         subject="Hello from QuizMaster",
         recipients=["neal@neal.com"],
         body="This is just a test email via MailHog."
@@ -63,6 +70,7 @@ class Users(Resource):
     
 class Register(Resource):
     def post(self):
+        from app.celery_app import registration_mail
         data = request.get_json()
         username=data.get('username')
         email=data.get('email')
@@ -78,6 +86,9 @@ class Register(Resource):
         new_user= User(username=username, email=email, password_hash=hashed)
         db.session.add(new_user)
         db.session.commit()
+
+        # Celery
+        registration_mail.delay(new_user.email, new_user.username)
 
         return {"message": "User registered successfully"}, 201
     
@@ -499,12 +510,15 @@ class AttemptQuiz(Resource):
 class SubmitQuiz(Resource):
     method_decorators=[login_required]
     def post(self):
+        from app.celery_app import post_quiz_mail
         data=request.get_json()
         quiz_id = data.get('quiz_id')
         answers = data.get('answers')
         att_start = parse(data.get('att_start'))
         att_end = parse(data.get('att_end'))
         user_id = current_user.user_id
+
+        quiz=Quiz.query.filter_by(quiz_id=quiz_id).first().quiz_name
 
         questions = Questions.query.filter_by(quiz_id=quiz_id).all()
         total_score=0
@@ -516,6 +530,10 @@ class SubmitQuiz(Resource):
         score=Scores(user_id=user_id, quiz_id=quiz_id, attempt_start=att_start, attempt_end=att_end, total_scored=total_score)
         db.session.add(score)
         db.session.commit()
+
+        # Celery
+        post_quiz_mail.delay(current_user.email, current_user.username, att_end, quiz)
+
         return {'message': 'Quiz Successfully Submitted'}, 201
 
 class Score(Resource):
