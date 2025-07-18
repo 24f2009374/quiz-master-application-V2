@@ -57,16 +57,15 @@ class CurrentUser(Resource):
         }
 
 class AllUsers(Resource):
-    @cache.cached(timeout=900, key_prefix='all_users')
     def get(self):
-        users=User.query.all()
-        res=[u.to_dict() for u in users]
-        return res[1:], 200
+        users=User.query.all()[1:]
+        res=[{'username':u.username, 'email':u.email, 'user_id':u.user_id} for u in users]
+        return res, 200
     
 class Users(Resource):
     def get(self, user_id):
-        user=User.query.filter_by(user_id=user_id).first()
-        return user.to_dict(), 200
+        u=User.query.filter_by(user_id=user_id).first()
+        return {'username':u.username, 'email':u.email, 'user_id':u.user_id}, 200
     
 class Register(Resource):
     def post(self):
@@ -538,7 +537,6 @@ class SubmitQuiz(Resource):
 
 class Score(Resource):
     method_decorators=[login_required]
-    @cache.cached(timeout=900, key_prefix='list_score')
     def get(self, quiz_id):
         scores=Scores.query.filter_by(quiz_id=quiz_id, user_id=current_user.user_id).all()
         questions=Questions.query.filter_by(quiz_id=quiz_id).all()
@@ -549,7 +547,6 @@ class Score(Resource):
 
 class UserScores(Resource):
     method_decorators=[login_required]
-    @cache.cached(timeout=900, key_prefix='user_score')
     def get(self, user_id):
         user=User.query.filter_by(user_id=user_id).first()
         scores=Scores.query.filter_by(user_id=user_id).all()

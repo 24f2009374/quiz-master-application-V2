@@ -11,14 +11,14 @@
 <div class="mt-4 v-cloak" id="app">
     <div class="container">
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Error: {% raw %} {{ error }} {% endraw %}
+                    Error: <span v-text="error"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
     <div class="container">
         <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-            Success:{% raw %} {{ success }} {% endraw %}
+            Success: <span v-text="success"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
@@ -48,8 +48,8 @@
                 <div v-for="subject in subjects" :key="subject.id" class="col-12 col-sm-6 col-md-4">
                     <div class="card text-bg-secondary border-black " style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
                         <div class="card-body border-black">
-                            <h5 class="card-title"> {% raw %}{{ subject.name }}{% endraw %}</h5>
-                            <p class="card-text">{% raw %}{{ subject.desc }}{% endraw %}</p>
+                            <h5 class="card-title" v-text="subject.name"></h5>
+                            <p class="card-text" v-text="subject.desc"></p>
                         </div>
 
                         <div class="card-footer border-black">
@@ -64,12 +64,12 @@
                             <div class="row">
                                 <div class="col">
                                     <button class="btn btn-warning mx-1 btn-sm" title="Update">
-                                        <a :href="'/admin/subjects/update/' + subject.id"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>
+                                        <a :href="'/admin/subjects/update/' + subject.id"><img src="{{ url_for('static', filename='update.png') }}" style="height: 25px; width: 25px;"></a>Update
                                     </button>
                                 </div>
                                 <div class="col">
                                     <button class="btn btn-sm btn-danger" @click="confirmDelete(subject.id)">
-                                        <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">Delete
+                                        <img src="{{ url_for('static', filename='delete-295.png') }}" style="height: 25px; width: 25px;">Delete
                                     </button>
                                 </div>
                             </div>
@@ -82,11 +82,6 @@
             </div>
         </div>
   </transition>
-  
-  
-  <div class="content-wrapper" :style="contentCalc">
-    <h1>Tester</h1>
-  </div>
 </div>
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>

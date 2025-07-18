@@ -6,31 +6,31 @@
 {% block content %}
 <div class="container mt-4 v-cloak" id="app">
         <div class="container">
-            <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                Error: {% raw %} {{ error }} {% endraw %}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: <span v-text="error"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
 
-        <div class="container">
-            <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-                Success:{% raw %} {{ success }} {% endraw %}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+    <div class="container">
+        <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            Success: <span v-text="success"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
 
         <div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
             <div class="text-center">
                 <h2 class="my-3" style="padding-top: 15px;">Attempt Quiz</h2>
                 <p class="lead">Are you Prepared?</p>
-                <p class="lead">Chapter: {% raw %}{{ QuizObj.parent }}{% endraw %}</p>
-                <p class="lead">Quiz: {% raw %}{{ QuizObj.name }}{% endraw %}</p>
+                <p class="lead">Chapter: <span v-text="QuizObj.parent"></span></p>
+                <p class="lead">Quiz: <span v-text="QuizObj.name "></span></p>
             </div>
             <div class="row justify-content-center my-3">
                 <div class="col-lg-6 mx-auto">
-                    <p>Alloted Time: {% raw %}{{ QuizObj.time }}{% endraw %} Minutes</p>
-                    <p>Alloted Marks: {% raw %}{{ QuizObj.total }}{% endraw %}</p>
-                    <p>Attempt Number: {% raw %}{{ QuizObj.count }}{% endraw %}</p>
+                    <p>Alloted Time: <span v-text="QuizObj.time"></span> Minutes</p>
+                    <p>Alloted Marks: <span v-text="QuizObj.total"></span></p>
+                    <p>Attempt Number: <span v-text="QuizObj.count"></span></p>
                     <button class="btn btn-warning mx-1 btn-sm" title="Attempt">
                         <a :href="'/user/attempt/'+QuizObj.id" style="height: 25px; width: 25px;">Attempt Quiz</a>
                     </button>

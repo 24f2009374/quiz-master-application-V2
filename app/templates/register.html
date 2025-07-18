@@ -18,14 +18,14 @@
         </div>
         <div class="container">
             <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        Error: {% raw %} {{ error }} {% endraw %}
+                        Error: <span v-text="error"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
 
         <div class="container">
             <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-                        Success:{% raw %} {{ success }} {% endraw %}
+                        Success: <span v-text="success"></span>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
         </div>

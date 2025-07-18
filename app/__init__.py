@@ -22,7 +22,7 @@ def create_app():
         CACHE_TYPE='RedisCache',
         CACHE_REDIS_HOST='localhost',
         CACHE_REDIS_PORT=6379,
-        CACHE_DEFAULT_TIMEOUT=300
+        CACHE_DEFAULT_TIMEOUT=60
     )
 
     cache.init_app(app)
@@ -74,7 +74,7 @@ def create_app():
     api.add_resource(Preparation, '/api/prepare/<int:quiz_id>')
     api.add_resource(AttemptQuiz, '/api/attempt/<int:quiz_id>')
     api.add_resource(SubmitQuiz, '/api/attempt/submit')
-    api.add_resource(Score, '/api/scores/<int:quiz_id>')
+    api.add_resource(Score, '/api/scores/<int:quiz_id>') 
 
 
 

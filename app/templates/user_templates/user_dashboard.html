@@ -7,23 +7,16 @@
 
 
 <div class="container mt-4" id="app"  data-user-id="{{ current_user.user_id }}">
-    <h3>To add</h3>
-    <ul>
-        <li>quiz itself</li>
-        <li>scorecard / user-self</li>
-    </ul>
-    <h4>Attempt Quiz -> Preparation Page -> Quiz Itself -> Post Quiz Page</h4>
-
     <div class="container">
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Error: {% raw %} {{ error }} {% endraw %}
+                    Error: <span v-text="error"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
     <div class="container">
         <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-            Success:{% raw %} {{ success }} {% endraw %}
+            Success: <span v-text="success"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
@@ -36,9 +29,9 @@
         <div v-for="enroll in Enrollments" :key="enroll.id" class="col-md-4 mb-4">
             <div class="card text-bg-secondary border-black " style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
                 <div class="card-body border-black">
-                    <h5 class="card-title"> {% raw %}{{ enroll.name }}{% endraw %}</h5>
-                    <p class="card-text">Time Allotted: {% raw %}{{ enroll.time }}{% endraw %} Minutes</p>
-                    <p class="card-text">Date: {% raw %}{{ enroll.date }}{% endraw %}</p>
+                    <h5 class="card-title"> <span v-text="enroll.name"></span></h5>
+                    <p class="card-text">Time Allotted: <span v-text="enroll.time"></span> Minutes</p>
+                    <p class="card-text">Date: <span v-text=" enroll.date"></span></p>
                 </div>
     
                 <div class="card-footer border-black">

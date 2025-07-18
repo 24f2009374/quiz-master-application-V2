@@ -6,14 +6,14 @@
 <div class="container mt-4" id="app">
     <div class="container">
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Error: {% raw %} {{ error }} {% endraw %}
+                    Error: <span v-text="error"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
     <div class="container">
         <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-            Success:{% raw %} {{ success }} {% endraw %}
+            Success: <span v-text="success"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
@@ -21,8 +21,8 @@
     <div style="margin-bottom: 10px;">
         <button @click="goBack" class="btn btn-secondary">← Back</button>
     </div>
-    <h2>Chapter Name: {% raw %}{{quizObj.name}}{% endraw %}</h2>
-    <h3>Quiz Total: {% raw %}{{total}}{% endraw %}</h3>
+    <h2>Chapter Name: <span v-text="quizObj.name"></h2>
+    <h3>Quiz Total: <span v-text="total"></span></h3>
     <br>
     <div style="margin-top: 15px;">
         <a :href="'/admin/quizzes/' + quizObj.id + '/questions/create'">+ Create Question</a>
@@ -37,17 +37,17 @@
                 <div class="card text-bg-secondary border-black" style=" margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 500px;">
                     <div class="card-body border-black">
                         <div class="row">
-                            <div class="col"><h5 class="card-title"> Question {% raw %}{{ ind+1 }}: {{ ques.statement }}{% endraw %} </h5></div>
-                            <div class="col" style="text-align: right; font-size: 20px;">[{% raw %}{{ques.marks}}{% endraw %}]</div>
+                            <div class="col"><h5 class="card-title"> Question <span v-text="ind+1"></span>: <span v-text="ques.statement"></span></h5></div>
+                            <div class="col" style="text-align: right; font-size: 20px;">[<span v-text="ques.marks"></span>]</div>
                              
                         </div>
                         <ul>
                             <div class="mb-4" v-for="opt in ques.options">
-                                <li>{% raw %}{{opt}}{% endraw %}</li>
+                                <li v-text="opt"></li>
                             </div>
                         </ul>
                         <br>
-                        <div class="col">Correct Option: [{% raw %}{{ques.correct}}{% endraw %}]</div>
+                        <div class="col">Correct Option: [<span v-text="ques.correct"></span>]</div>
                     </div>
                     <div class="card-footer border-black"> 
                         <div class="row">
@@ -59,7 +59,7 @@
                             </div>
                             <div class="col">
                                 <button class="btn btn-sm btn-danger" @click="confirmDelete(ques.id)">
-                                    <img src="{{ url_for('static', filename='delete-295.png.') }}" style="height: 25px; width: 25px;">Delete
+                                    <img src="{{ url_for('static', filename='delete-295.png') }}" style="height: 25px; width: 25px;">Delete
                                 </button>
                             </div>
                         </div>                   

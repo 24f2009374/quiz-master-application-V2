@@ -8,18 +8,17 @@
 <div class="container mt-4" id="app">
     <div class="container">
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Error: {% raw %} {{ error }} {% endraw %}
+                    Error: <span v-text="error"></span>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
 
     <div class="container">
         <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
-            Success:{% raw %} {{ success }} {% endraw %}
+            Success: <span v-text="success"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
-
     <div v-if="!scores.length" class="text-center text-muted w-100">
         <p style="color: white;">No Attempts </p>
     </div>
@@ -27,9 +26,9 @@
     <div>
         <ul class="list-group list-group-flush list-group-numbered" >
             <li class="list-group-item text-bg-secondary border-black" v-for="(s,ind) in scores" :key="s.sid" style="margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8);">
-                <p>Attempt Start: {% raw %} {{ s.start }} {% endraw %}</p>
-                <p>Attempt End: {% raw %} {{ s.end }} {% endraw %}</p>
-                <p>Marks Scores: {% raw %} {{ s.scored }} {% endraw %}/{% raw %} {{ s.total }} {% endraw %}</p>
+                <p>Attempt Start:  <span v-text="s.start"></span>}</p>
+                <p>Attempt End:  <span v-text="s.end"></span></p>
+                <p>Marks Scores:  <span v-text="s.scored"></span>/<span v-text="s.total"></span></p>
             </li>
         </ul>
     </div>
