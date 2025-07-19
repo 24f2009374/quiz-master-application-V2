@@ -8,7 +8,7 @@ from flask_login import login_required, current_user, logout_user, login_user, l
 import datetime
 from dateutil.parser import parse
 from app.mail import send_basic_mail
-#from app.celery_app import registration_mail, post_quiz_mail
+
 
 bp_main=Blueprint('main',__name__)
 
@@ -57,6 +57,7 @@ class CurrentUser(Resource):
         }
 
 class AllUsers(Resource):
+    @cache.cached(timeout=900, key_prefix='all_users')
     def get(self):
         users=User.query.all()[1:]
         res=[{'username':u.username, 'email':u.email, 'user_id':u.user_id} for u in users]
@@ -112,7 +113,54 @@ class Login(Resource):
         else:
             return jsonify({"redirect": url_for('main.user_dashboard', user_id=user.user_id)})
     
+class AdminSearch(Resource):
+    method_decorators=[login_required, admin_required]
+    @cache.cached(timeout=60, key_prefix='admin_search_result', query_string=True)
+    def get(self):
+        query = request.args.get('q', '').strip().lower()
+        if not query:
+            return {"error": "Empty query"}, 400
+        
+        # User, Subject, Chapter, Quiz, Questions, Scores, Enrollments
+        
+        users = User.query.filter(User.username.ilike(f"%{query}%")).all()
 
+        subs = Subject.query.filter((Subject.sub_name.ilike(f"%{query}%")) | (Subject.sub_desc.ilike(f"%{query}%"))).all()
+
+        chaps = Chapter.query.filter((Chapter.chap_name.ilike(f"%{query}%")) |(Chapter.chap_desc.ilike(f"%{query}%"))).all()
+
+        quizzes = Quiz.query.filter(Quiz.quiz_name.ilike(f"%{query}%")).all()
+
+        search_result={
+            "users":[{'username':u.username, 'email':u.email, 'user_id':u.user_id} for u in users] if users else [],
+            "subjects":[{'id':s.sub_id, 'name':s.sub_name, 'desc':s.sub_desc} for s in subs] if subs else [],
+            "chapters":[{'id':c.chap_id, 'name':c.chap_name, 'desc':c.chap_desc, 'parent':c.subject_id} for c in chaps] if chaps else [],
+            "quizzes":[{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes] if quizzes else []
+        }
+
+        print(search_result)
+
+        return search_result
+
+class UserSearch(Resource):
+    method_decorators=[login_required]
+    @cache.cached(timeout=60, key_prefix='user_search_result', query_string=True)
+    def get(self):
+        query = request.args.get('q', '').strip().lower()
+        if not query:
+            return {"error": "Empty query"}, 400
+        
+        # May add heirarchial Quiz View for Users
+
+        quizzes = Quiz.query.filter(Quiz.quiz_name.ilike(f"%{query}%")).all()
+
+        search_result={
+            "quizzes":[{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes] if quizzes else []
+        }
+
+        print(search_result)
+
+        return search_result
 #--------------------------------------------CRUD RESOURCES--------------------------------------------
 
 class DB_Subjects(Resource):
@@ -259,6 +307,7 @@ class DB_Quizzes(Resource):
         return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes]
     
     def post(self, chap_id):
+        from app.celery_app import new_quiz_mail
         data=request.get_json()
         quiz_name=data.get('quiz_name')
         date_str=data.get('date')
@@ -280,6 +329,8 @@ class DB_Quizzes(Resource):
         db.session.commit()
         cache.delete('child_quiz')
         cache.delete('all_quiz')
+
+        new_quiz_mail.delay(new_quiz.quiz_name, Chapter.query.filter_by(chap_id=chap_id).first().chap_name)
 
         return {'message': 'Quiz created successfully'}, 201
     
@@ -604,6 +655,12 @@ def all_quiz():
 def all_user():
     return render_template("admin_templates/all_user.html")
 
+@bp_main.route('/admin/search/results')
+@login_required
+@admin_required
+def admin_search_result():
+    return render_template("admin_templates/admin_search.html")
+
 #--------------------------------------------DB CREATES--------------------------------------------
 
 @bp_main.route('/admin/subjects/create')
@@ -717,6 +774,11 @@ def thank():
 @login_required
 def score(quiz_id):
     return render_template("user_templates/user_score.html")
+
+@bp_main.route('/user/search/results')
+@login_required
+def user_search_results():
+    return render_template("user_templates/user_search.html")
 
 
 

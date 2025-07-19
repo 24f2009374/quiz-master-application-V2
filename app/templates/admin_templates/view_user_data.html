@@ -29,29 +29,6 @@
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    const { createApp, ref, onMounted }=Vue;
-    createApp({
-        setup(){
-            const user=ref([])
-            const error=ref("")
-            const UID=parseInt(window.location.pathname.split('/').pop());
-            const scores=ref([])
+<script src="{{ url_for('static', filename='js/view_user_data.js') }}"></script>
 
-            onMounted(async () => {
-                try{
-                    const response1=await axios.get(`/api/users/${UID}`);
-                    user.value=response1.data;
-
-                    const response2=await axios.get(`/api/users/scores/${UID}`)
-                    scores.value=response2.data
-                } catch(err) {
-                    error.value=err
-                }
-            })
-
-            return {user, error, scores}
-        }
-    }).mount("#app")
-</script>
 {% endblock %}

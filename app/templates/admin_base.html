@@ -44,10 +44,13 @@
             </div>
 
             <!-- Center search (TBA) -->
-            <form class="d-flex mx-3" role="search" style="max-width: 300px; padding-right: 50px;">
-                <input class="form-control form-control-sm" type="search" placeholder="Search (Coming Soon)" aria-label="Search" disabled>
-            </form>
-
+            <div id="admin-search" style="margin-right: 10px;">
+                <form @submit.prevent="adminSearch" class="d-flex">
+                    <input id="search-input" placeholder="Search..." class="form-control form-control-sm" style="color: #000000;"/>
+                    <button type="submit" class="btn btn-success btn-sm" style="margin-left: 5px;">Search</button>
+                </form>
+            </div>
+            
             <!-- Right side: -->
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white">Welcome, Admin</span>
@@ -63,5 +66,32 @@
         {% endblock %}
     </div>
 
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        //const { createApp, ref } = Vue
+        createApp({
+            setup() {
+            const query = ref("");
+
+            const adminSearch =async () => {
+                const input = document.querySelector("#search-input");
+                const value = input?.value || "";
+                console.log("Submitted query:", value);
+                query.value = value;
+                
+                try {
+                   const response=await axios.get('/api/admin/search',{params: { q: query.value }} )
+                   window.location.href=`/admin/search/results?q=${encodeURIComponent(query.value)}`;
+                } catch(err) {
+                    console.error(err)
+                }
+            };
+
+            return { adminSearch, query };
+            }
+  }).mount("#admin-search");
+
+    </script>
 </body>
 </html>

@@ -14,7 +14,7 @@ def create_celery(app):
 
     celery.conf.beat_schedule = {
         "daily-reminders":{
-            'task':'app.celery_app.daily_reminder_all',
+            'task':'daily_reminder_all',
             'schedule':crontab(hour=7, minute=0),
         },
     }
@@ -38,7 +38,7 @@ def create_celery(app):
 celery=create_celery(flask_app)
 
 #------Tasks------
-@celery.task(name='app.tasks.daily_reminder_all')
+@celery.task(name='daily_reminder_all')
 def daily_reminder_all():
     users=User.query.all()[1::]
     for u in users:
@@ -48,7 +48,7 @@ def daily_reminder_all():
             body=f"Good Morning, {u.username},\nDon't Forget to take Quizzes today and have a great day ahead"
         )
 
-@celery.task(name='app.tasks.registration_mail')
+@celery.task(name='registration_mail')
 def registration_mail(email, username):
     send_basic_mail(
         subject="Welcome to QuizMaster!",
@@ -56,7 +56,7 @@ def registration_mail(email, username):
         body=f"Hello {username}, thanks for joining QuizMaster. Good luck!"
     )
 
-@celery.task(name='app.tasks.post_quiz_mail')
+@celery.task(name='post_quiz_mail')
 def post_quiz_mail(email, username, end_stamp, quiz_name):
     send_basic_mail(
         subject=f"Completion of Quiz: {quiz_name}",
@@ -72,5 +72,13 @@ def debug_heartbeat():
         body="SEND EVERY 10S"
     )
 
-    
+@celery.task(name='new_quiz_mail')
+def new_quiz_mail(quiz_name, chap_name):
+    users=User.query.all()[1::]
+    for u in users:
+        send_basic_mail(
+            subject=f"New Quiz Made under Chapter {chap_name}",
+            recipients=[u.email],
+            body=f"Quiz is named {quiz_name}"
+        )
         

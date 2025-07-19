@@ -1,0 +1,57 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{%block content%}
+<div class="container mt-4" id="app" v-cloak>
+    <div v-if="results">
+        <div v-if="users.length">
+            <h3>Users</h3>
+            <ul>
+                <li v-for="user in users" :key="user.user_id">
+                    <a :href="'/admin/users/'+user.user_id"><span v-text="user.username"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div v-else style="margin-bottom:10px;"><h3>No Users Found</h3></div>
+
+        <div v-if="subs.length">
+            <h3>Subjects</h3>
+            <ul>
+                <li v-for="sub in subs" :key="sub.id">
+                    <a :href="'/admin/subjects/'+sub.id"><span v-text="sub.name"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div v-else style="margin-bottom:10px;"><h3>No Subjects Found</h3></div>
+
+        <div v-if="chaps.length">
+            <h3>Chapters</h3>
+            <ul>
+                <li v-for="chap in chaps" :key="chap.id">
+                    <a :href="'/admin/chapters/'+chap.id"><span v-text="chap.name"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div v-else style="margin-bottom:10px;"><h3>No Chapters Found</h3></div>
+
+        <div v-if="quizzes.length">
+            <h3>Quizzes</h3>
+            <ul>
+                <li v-for="quiz in quizzes" :key="quiz.id">
+                    <a :href="'/admin/quizzes/'+quiz.id"><span v-text="quiz.name"></span></a>
+                </li>
+            </ul>
+        </div>
+        <div v-else style="margin-bottom:10px;"><h3>No Quizzes Found</h3></div>
+
+    </div>
+    <div v-else>
+        <h3>No Results</h3>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/admin_search.js') }}"></script>
+{% endblock %}

@@ -34,8 +34,7 @@ def create_app():
     login_manager.login_view="main.login"
     login_manager.login_message_category = "info"
 
-
-    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score, AllUsers, UserScores, CurrentUser
+    from app.routes import bp_main, Users, Register, Login, DB_Subjects, DB_Questions, DB_Chapters, DB_Quizzes, QuizDetail, ChapterDetail, SubjectDetail, QuestionDetail, Enrollment, AllQuiz, AllChapter, Preparation, AttemptQuiz, SubmitQuiz, Score, AllUsers, UserScores, CurrentUser, UserSearch, AdminSearch
     from app.models import User
 
     app.register_blueprint(bp_main)
@@ -48,37 +47,41 @@ def create_app():
         db.create_all()
         create_admin_account()
 
-    
+    # General APIs and Admin APIs
     api.add_resource(Users, '/api/users/<int:user_id>')
     api.add_resource(AllUsers,'/api/users/')
     api.add_resource(Register, '/api/register')
     api.add_resource(Login, '/api/login')
-    api.add_resource(UserScores, '/api/users/scores/<int:user_id>')
+    api.add_resource(AdminSearch, '/api/admin/search')
     api.add_resource(CurrentUser, '/api/users/me')
 
+    #Subjects
     api.add_resource(DB_Subjects, '/api/subjects/crud', '/api/subjects/crud/<int:sub_id>')
     api.add_resource(SubjectDetail, '/api/subjects/<int:sub_id>')
 
+    #Chapters
     api.add_resource(DB_Chapters, '/api/subjects/<int:sub_id>/chapters/crud', '/api/subjects/<int:sub_id>/chapters/crud/<int:chap_id>')
     api.add_resource(ChapterDetail, '/api/chapters/<int:chap_id>')
     api.add_resource(AllChapter, '/api/chapters')
 
+    #Quizzes
     api.add_resource(DB_Quizzes, '/api/chapters/<int:chap_id>/quizzes/crud', '/api/chapters/<int:chap_id>/quizzes/crud/<int:quiz_id>')
     api.add_resource(QuizDetail, '/api/quizzes/<int:quiz_id>')
     api.add_resource(AllQuiz, '/api/quizzes')
 
+    #Questions
     api.add_resource(DB_Questions, '/api/quizzes/<int:quiz_id>/questions/crud', '/api/quizzes/<int:quiz_id>/questions/crud/<int:q_id>')
     api.add_resource(QuestionDetail, '/api/questions/<int:q_id>')
 
+    #User APIs
     api.add_resource(Enrollment, '/api/enrolls/crud/<int:user_id>', '/api/enrolls/crud')
     api.add_resource(Preparation, '/api/prepare/<int:quiz_id>')
     api.add_resource(AttemptQuiz, '/api/attempt/<int:quiz_id>')
     api.add_resource(SubmitQuiz, '/api/attempt/submit')
     api.add_resource(Score, '/api/scores/<int:quiz_id>') 
+    api.add_resource(UserScores, '/api/users/scores/<int:user_id>')
+    api.add_resource(UserSearch, '/api/user/search')
 
-
-
-    
     return app
 
 def create_admin_account():

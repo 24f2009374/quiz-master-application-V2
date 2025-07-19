@@ -1,0 +1,52 @@
+{% extends "user_base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block links %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="app" v-cloak>
+    <div class="container">
+        <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Error: <span v-text="error"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div v-if="success" class="alert alert-success alert-dismissible fade show" role="alert">
+            Success: <span v-text="success"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <div v-if="results">
+        <div v-if="quizzes.length">
+            <h3>Quizzes</h3>
+            <div v-for="quiz in quizzes" :key="quiz.id" class="col-md-4 mb-4">
+                <div class="card text-bg-secondary border-black" style="width: 350px; margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); height:250px;">
+                    <div class="card-body border-black">
+                        <h4 class="card-title"> Chapter: <span v-text="quiz.parent"></span></h4>
+                        <h5 class="card-text"> <span v-text="quiz.name"></span></h5>
+                        <p class="card-text">Time Allotted: <span v-text="quiz.time"></span></p>
+                        <p class="card-text">Date: <span v-text="quiz.date"></span></p>
+                    </div>
+
+                    <div class="card-footer border-black">
+                        <button class="btn btn-warning mx-1 btn-sm" title="Update" @click="enrollNow(quiz.id)">
+                                Enroll
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-else style="margin-bottom:10px;"><h3>No Quizzes Found</h3></div>
+
+    </div>
+    <div v-else>
+        <h3>No Results</h3>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/user_search.js') }}"></script>
+{% endblock %}

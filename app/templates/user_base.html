@@ -43,9 +43,12 @@
             </div>
 
             <!-- Center search (TBA) -->
-            <form class="d-flex mx-3" role="search" style="max-width: 300px; padding-right: 50px;">
-                <input class="form-control form-control-sm" type="search" placeholder="Search (Coming Soon)" aria-label="Search" disabled>
-            </form>
+            <div id="user-search" style="margin-right: 10px;">
+                <form @submit.prevent="userSearch" class="d-flex">
+                    <input id="search-input" placeholder="Search Quizzes" class="form-control form-control-sm" style="color: #000000;"/>
+                    <button type="submit" class="btn btn-success btn-sm" style="margin-left: 5px;">Search</button>
+                </form>
+            </div>
 
             <!-- Right side: --> <!--{% block user %}{% endblock %}-->
             <div class="d-flex align-items-center gap-3">
@@ -84,6 +87,28 @@
                 return {user}
             }
         }).mount("#user-greeting");
+
+        createApp({
+            setup() {
+            const query = ref("");
+
+            const userSearch =async () => {
+                const input = document.querySelector("#search-input");
+                const value = input?.value || "";
+                console.log("Submitted query:", value);
+                query.value = value;
+                
+                try {
+                   const response=await axios.get('/api/user/search',{params: { q: query.value }} )
+                   window.location.href=`/user/search/results?q=${encodeURIComponent(query.value)}`;
+                } catch(err) {
+                    console.error(err)
+                }
+            };
+
+            return { userSearch, query };
+            }
+        }).mount("#user-search");
     </script>
 </body>
 </html>
