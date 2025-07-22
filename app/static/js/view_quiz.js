@@ -33,6 +33,7 @@ createApp({
         onMounted(async () => {
             const parts=window.location.pathname.split('/');
             quizObj.value.id=parseInt(parts[parts.length-1]);
+            console.log(quizObj.value.id)
 
             try {
                 const response1 = await axios.get(`/api/quizzes/${quizObj.value.id}`);
@@ -40,6 +41,7 @@ createApp({
 
                 const response2 = await axios.get(`/api/quizzes/${quizObj.value.id}/questions/crud`);
                 Questions.value=response2.data;
+                console.log(response2.data)
                 
 
                 for(i=0; i<Questions.value.length; i++){
@@ -55,7 +57,6 @@ createApp({
             for(i=0; i<Questions.value.length; i++){
                 ques=Questions.value[i];
                 total.value+=parseInt(ques.marks);
-                console.log(total.value)
             }
 
         

@@ -32,9 +32,9 @@
         <p style="color: white;">No Questions Yet? </p><a :href="'/admin/quizzes/' + quizObj.id + '/questions/create'">Create Questions</a>
     </div>
     <!--class="col-12 col-sm-6 col-md-4"-->
-    <div class="row">
-        <div v-for="(ques, ind) in Questions" :key="ques.id">
-                <div class="card text-bg-secondary border-black" style=" margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 500px;">
+    <div class="row row-cols-2">
+        <div v-for="(ques, ind) in Questions" :key="ques.id" class="col">
+                <div class="card text-bg-secondary border-black col" style=" margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 500px;">
                     <div class="card-body border-black">
                         <div class="row">
                             <div class="col"><h5 class="card-title"> Question <span v-text="ind+1"></span>: <span v-text="ques.statement"></span></h5></div>

@@ -161,6 +161,26 @@ class UserSearch(Resource):
         print(search_result)
 
         return search_result
+
+class TopUsers(Resource):
+    method_decorators=[login_required]
+    def get(self):
+        latests=db.session.query(Scores.user_id, Scores.quiz_id, db.func.max(Scores.attempt_end).label("latest")).group_by(Scores.user_id, Scores.quiz_id).subquery()
+
+        joined_set=db.session.query(Scores).join(latests, (Scores.user_id == latests.c.user_id) &(Scores.quiz_id == latests.c.quiz_id) &(Scores.attempt_end == latests.c.latest)).subquery()
+
+        total_scores=db.session.query(User.username, db.func.sum(joined_set.c.total_scored).label('total_marks')
+                                      ).join(User, User.user_id == joined_set.c.user_id
+                                             ).group_by(User.username
+                                                ).order_by(db.desc('total_marks')
+                                                    ).limit(3).all()
+        
+        result={"labels": [r.username for r in total_scores], "data": [r.total_marks for r in total_scores]}
+
+        return jsonify(result)
+
+
+        
 #--------------------------------------------CRUD RESOURCES--------------------------------------------
 
 class DB_Subjects(Resource):
@@ -168,6 +188,7 @@ class DB_Subjects(Resource):
     @cache.cached(timeout=900, key_prefix='all_subjects')
     def get(self):
         subs=Subject.query.all()
+        
         return [{'id':s.sub_id, 'name':s.sub_name, 'desc':s.sub_desc} for s in subs]
     
     def post(self):
@@ -239,9 +260,10 @@ class DB_Subjects(Resource):
    
 class DB_Chapters(Resource):
     method_decorators=[login_required]
-    @cache.cached(timeout=900, key_prefix='child_chaps')
+    @cache.cached(timeout=900, key_prefix=lambda: f"child_chaps_{request.view_args['sub_id']}")
     def get(self, sub_id):
         chaps=Chapter.query.filter_by(subject_id=sub_id)
+        
         return [{'id':c.chap_id, 'name':c.chap_name, 'desc':c.chap_desc, 'parent':c.subject_id} for c in chaps]
     
     def post(self, sub_id):
@@ -261,7 +283,7 @@ class DB_Chapters(Resource):
         new_chap= Chapter(chap_name=chap_name, chap_desc=chap_desc, subject_id=sub_id)
         db.session.add(new_chap)
         db.session.commit()
-        cache.delete('child_chaps')
+        cache.delete(f"child_chaps_{sub_id}")
         cache.delete('all_chap')
 
         return {'message': 'Chapter created successfully'}, 201
@@ -280,7 +302,7 @@ class DB_Chapters(Resource):
         chapter.chap_name=chap_name
         chapter.chap_desc=chap_desc
         db.session.commit()
-        cache.delete('child_chaps')
+        cache.delete(f"child_chaps_{sub_id}")
         cache.delete('all_chap')
         return {'message': 'Chapter updated successfully'}, 200
     
@@ -295,15 +317,16 @@ class DB_Chapters(Resource):
 
         db.session.delete(chapter)
         db.session.commit()
-        cache.delete('child_chaps')
+        cache.delete(f"child_chaps_{sub_id}")
         cache.delete('all_chap')
         return {'message': 'Chapter and all related data deleted successfully.'}, 200
 
 class DB_Quizzes(Resource):
     method_decorators=[login_required]
-    @cache.cached(timeout=900, key_prefix='child_quiz')
+    @cache.cached(timeout=900, key_prefix=lambda: f"child_quiz_{request.view_args['chap_id']}")
     def get(self, chap_id):
         quizzes=Quiz.query.filter_by(chapter_id=chap_id)
+        
         return [{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes]
     
     def post(self, chap_id):
@@ -327,7 +350,7 @@ class DB_Quizzes(Resource):
         new_quiz=Quiz(quiz_name=quiz_name, date=date_obj, time=time, chapter_id=chap_id)
         db.session.add(new_quiz)
         db.session.commit()
-        cache.delete('child_quiz')
+        cache.delete(f"child_quiz_{chap_id}")
         cache.delete('all_quiz')
 
         new_quiz_mail.delay(new_quiz.quiz_name, Chapter.query.filter_by(chap_id=chap_id).first().chap_name)
@@ -352,7 +375,7 @@ class DB_Quizzes(Resource):
         quiz.time=time
         quiz.date=date_obj
         db.session.commit()
-        cache.delete('child_quiz')
+        cache.delete(f"child_quiz_{chap_id}")
         cache.delete('all_quiz')
         return {'message': 'Quiz updated successfully'}, 200
     
@@ -363,16 +386,17 @@ class DB_Quizzes(Resource):
         Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
         db.session.delete(quiz)
         db.session.commit()
-        cache.delete('child_quiz')
+        cache.delete(f"child_quiz_{chap_id}")
         cache.delete('all_quiz')
 
         return {'message': 'Quiz and all related data deleted successfully.'}, 200
 
 class DB_Questions(Resource):
     method_decorators=[login_required]
-    @cache.cached(timeout=900, key_prefix='child_ques')
+    @cache.cached(timeout=30, key_prefix=lambda: f"quiz_questions_{request.view_args['quiz_id']}")
     def get(self, quiz_id):
         questions=Questions.query.filter_by(quiz_id=quiz_id)
+        
         return [{'id':q.qid,'statement':q.question_statement, 'parent':q.quiz_id, 'correct':q.correct_option, 'marks':q.marks, 'options':[q.option_1,q.option_2,q.option_3,q.option_4]} for q in questions]
     
     def post(self, quiz_id):
@@ -405,7 +429,7 @@ class DB_Questions(Resource):
                            marks=marks)
         db.session.add(new_ques)
         db.session.commit()
-        cache.delete('child_ques')
+        cache.delete(f"quiz_questions_{quiz_id}")
         return {'message': 'Question created successfully'}, 201
     
     def put(self, quiz_id):
@@ -429,14 +453,14 @@ class DB_Questions(Resource):
         ques.option_3=options[2] if options[2] else None 
         ques.option_4=options[3] if options[3] else None
         db.session.commit()
-        cache.delete('child_ques')
+        cache.delete(f"quiz_questions_{quiz_id}")
         return {'message': 'Question updated successfully'}, 200
 
     def delete(self, quiz_id, q_id):
 
         Questions.query.filter_by(qid=q_id).delete()
         db.session.commit()
-        cache.delete('child_ques')
+        cache.delete(f"quiz_questions_{quiz_id}")
         return {'message': 'Question deleted successfully.'}, 200
 
 #--------------------------------------------HEIRARCHIAL VIEW RESOURCES--------------------------------------------
@@ -481,7 +505,12 @@ class AllQuiz(Resource):
         res=[]
         for q in quizzes:
             chap=Chapter.query.filter_by(chap_id=q.chapter_id).first()
-            res.append({'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':chap.chap_name})
+            ques=Questions.query.filter_by(quiz_id=q.quiz_id).all()
+            total=0
+            for que in ques:
+                total+=que.marks
+            print(total)
+            res.append({'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':chap.chap_name, 'total':total})
         return res
     
 class AllChapter(Resource):
@@ -519,6 +548,7 @@ class Enrollment(Resource):
         new_enroll=Enrollments(user_id=user_id, quiz_id=quiz_id)
         db.session.add(new_enroll)
         db.session.commit()
+        cache.delete('enroll')
         return {"message": "Successfully Enrolled"}, 201
         
 class Preparation(Resource):
@@ -628,6 +658,8 @@ def login():
 @bp_main.route('/logout')
 def logout():
     logout_user()
+    cache.delete('current_user')
+    cache.delete('enroll')
     return redirect(url_for('main.login')) 
 
 """--------------------------------------------------------ADMIN ROUTES--------------------------------------------------------"""

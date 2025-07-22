@@ -53,6 +53,44 @@ const { createApp, ref, onMounted, computed } = Vue;
                 }
             });
 
+            // Charts
+           onMounted(async () => {
+            const top_res=await axios.get('/api/general/toppers')
+            
+            const labels = top_res.data.labels
+            const data = top_res.data.data
+
+            const ctx = document.getElementById('topUsersChart')
+
+            new Chart(ctx, {
+                type:'bar',
+                data:{
+                    labels:labels,
+                    datasets:[{
+                        label:"Total Marks (Latests)",
+                        data:data,
+                        backgroundColor: ['rgba(75, 192, 192, 0.5)', 'rgba(255, 99, 132, 0.5)', 'rgba(255, 159, 64, 0.5)'],
+                        borderColor:['rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(255, 159, 64)'],
+                        borderWidth: 1
+                    }]
+                },
+                options:{
+                    responsive:true,
+                    plugins:{
+                        legend:{display:false},
+                        title:{display:true, text:"Top 3 Users Across Quizzes"},
+
+                    }
+                },
+                scales:{
+                    y:{beginAtZero:true}
+                }
+            })
+
+
+
+           })
+
             return { panelOpen, togglePanel, subjects, contentCalc, confirmDelete, error, success };
         }
     }).mount('#app');

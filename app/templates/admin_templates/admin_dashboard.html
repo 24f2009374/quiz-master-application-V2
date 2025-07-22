@@ -80,8 +80,12 @@
             </div>
         </div>
   </transition>
+  <div class="row" style="color: white; margin-top: 10px;">
+        <canvas id="topUsersChart" width="300" height="150"></canvas>
+    </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="{{ url_for('static', filename='js/admin_dash.js') }}"></script>

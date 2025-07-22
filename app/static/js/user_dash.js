@@ -18,6 +18,10 @@ const { createApp, ref, onMounted } = Vue;
                     console.log(err)
                 }
             })
+
+            //Charts
+            
+
             
             return { Enrollments, error, success }
         }
