@@ -1,7 +1,8 @@
 from celery import Celery
 from celery.schedules import crontab
-from app.mail import send_basic_mail
-from app.models import User
+from app.mail import send_basic_mail, send_html_mail
+from app.models import User, Quiz, Scores, Chapter, Questions
+from flask import render_template_string
 from . import flask_app
 from datetime import datetime, timedelta
 
@@ -17,6 +18,10 @@ def create_celery(app):
             'task':'daily_reminder_all',
             'schedule':crontab(hour=7, minute=0),
         },
+        "monthly-user-report":{
+            'task':'monthly_report',
+            'schedule':crontab(day_of_month=1, hour=7, minute=0)
+        }
     }
 
     #USE FOR TEST AND SHOWING CELERY FUNCTIONAITY
@@ -81,4 +86,62 @@ def new_quiz_mail(quiz_name, chap_name):
             recipients=[u.email],
             body=f"Quiz is named {quiz_name}"
         )
-        
+    
+@celery.task(name='monthly_report')
+def monthly_report():
+    print("[CELERY] Monthly Mail Worker Running [CELERY]")
+
+    users=User.query.all()
+    now=datetime.now()
+
+    #The Dates below are used for the current month details for TESTING
+    start_date=datetime(now.year, now.month if now.month>1 else 12, 1)
+    end_date=datetime(now.year, now.month+1, 1)
+
+    #For an ACTUAL monthly report, this is used.
+    #start_date=datetime(now.year, now.month-1 if now.month>1 else 12, 1)
+    #end_date=datetime(now.year, now.month, 1)
+
+
+    print(start_date, end_date)
+    for user in users:
+        scores=Scores.query.filter(Scores.user_id==user.user_id, Scores.attempt_start>=start_date, Scores.attempt_end<end_date).all()
+        if not scores:
+            continue
+            
+        total_score=sum(s.total_scored for s in scores)
+        avg_score=round(total_score/len(scores), 2)
+        quiz_count=len(set(s.quiz_id for s in scores))
+
+        quiz_details=[]
+        for s in scores:
+            quiz=Quiz.query.get(s.quiz_id)
+            quiz_details.append({"name":quiz.quiz_name, "marks":s.total_scored})
+
+            
+
+        # HTML Format
+        html_content=render_template_string("""
+        <h2>Monthly Activity Report - {{month}}</h2>
+        <p>Hello {{ name }},</p>
+        <p>This is your Monthly Report for the month of {{month}}</p>
+        <ul>
+            <li><strong>Quizzes Taken: </strong>{{quizzes}}</li>
+            <li><strong>Average Score: </strong>{{average}}</li>
+        </ul>
+        <h4>Individual Quiz Scores</h4>
+        <ul>
+            {% for q in quiz_details %}
+                <li>{{q.name}} : {{ q.marks }}</li>
+            {% endfor %}
+        </ul>                                                                      
+        """, name=user.username, quizzes=quiz_count, average=avg_score, quiz_details=quiz_details, month=start_date.strftime("%B %Y"))
+
+
+
+
+        send_html_mail(subject=f"Your Monthly Report - {start_date.strftime('%B %Y')}", recipients=[user.email], html_body=html_content)
+    
+
+    print("[CELERY] Monthly Mail Worker COMPLETED [CELERY]\t[MAIL] Mail Successfully Sent [MAIL]")
+    

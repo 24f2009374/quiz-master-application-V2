@@ -79,7 +79,6 @@
                     try {
                         const response=await axios.get('/api/users/me')
                         user.value=response.data
-                        console.log(user.value)
                     } catch(err) {
                         console.log(err)
                     }

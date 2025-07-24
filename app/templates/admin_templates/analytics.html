@@ -1,0 +1,33 @@
+{% extends "admin_base.html" %}
+
+{% block title %}App Analytics{% endblock %}
+
+{%block content%}
+<div class="container mt-4" id="app">
+    <div class="row">
+        <div class="col" style="color: white; margin-top: 10px;">
+            <h1>Users with most Attempts</h1>
+            <canvas id="mostAttempts" width="300" height="150"></canvas>
+        </div>
+        <div class="col" style="color: white; margin-top: 10px;">
+            <h1>Top Users</h1>
+            <canvas id="topUsersChart" width="300" height="150"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col" style="color: white; margin-top: 10px;">
+            <h1>Highest Interaction Quizzes</h1>
+            <canvas id="topQuizzes" width="300" height="150"></canvas>
+        </div>
+        <div class="col">
+            
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
+{% endblock %}

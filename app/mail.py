@@ -18,3 +18,7 @@ def init_mail(app):
 def send_basic_mail(subject:str, recipients: list[str], body: str):
     msg=Message(subject=subject, recipients=recipients, body=body)
     mail.send(msg)
+
+def send_html_mail(subject, recipients, html_body):
+    msg=Message(subject=subject, recipients=recipients, html=html_body)
+    mail.send(msg)

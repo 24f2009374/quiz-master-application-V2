@@ -55,7 +55,7 @@ const { createApp, ref, onMounted, computed } = Vue;
 
             // Charts
            onMounted(async () => {
-            const top_res=await axios.get('/api/general/toppers')
+            const top_res=await axios.get('/api/charts', {params:{ctx:"TopUsers"}})
             
             const labels = top_res.data.labels
             const data = top_res.data.data
@@ -86,9 +86,6 @@ const { createApp, ref, onMounted, computed } = Vue;
                     y:{beginAtZero:true}
                 }
             })
-
-
-
            })
 
             return { panelOpen, togglePanel, subjects, contentCalc, confirmDelete, error, success };

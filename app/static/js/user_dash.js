@@ -13,7 +13,6 @@ const { createApp, ref, onMounted } = Vue;
                 try {
                     const response=await axios.get(`/api/enrolls/crud/${userId}`);
                     Enrollments.value=response.data
-                    console.log(Enrollments.value)
                 } catch(err) {
                     console.log(err)
                 }

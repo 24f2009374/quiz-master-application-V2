@@ -8,6 +8,7 @@ from flask_login import login_required, current_user, logout_user, login_user, l
 import datetime
 from dateutil.parser import parse
 from app.mail import send_basic_mail
+from sqlalchemy import func, desc
 
 
 bp_main=Blueprint('main',__name__)
@@ -29,6 +30,14 @@ def test_mail():
         recipients=["neal@neal.com"],
         body="This is just a test email via MailHog."
     )
+    return "Mail sent! Check MailHog."
+
+@bp_main.route('/admin/monthly-mail')
+@login_required
+def monthly_mail():
+    from app.celery_app import monthly_report
+    monthly_report()
+    print("[FLASK] Mail Prompted, Check Workers, Beats and MailHog [FLASK]")
     return "Mail sent! Check MailHog."
 #--------------------------------------------ADMIN WRAPPER--------------------------------------------
 def admin_required(f):
@@ -117,7 +126,7 @@ class AdminSearch(Resource):
     method_decorators=[login_required, admin_required]
     @cache.cached(timeout=60, key_prefix='admin_search_result', query_string=True)
     def get(self):
-        query = request.args.get('q', '').strip().lower()
+        query=request.args.get('q', '').strip().lower()
         if not query:
             return {"error": "Empty query"}, 400
         
@@ -162,24 +171,69 @@ class UserSearch(Resource):
 
         return search_result
 
-class TopUsers(Resource):
+class ChartGeneral(Resource):
     method_decorators=[login_required]
     def get(self):
-        latests=db.session.query(Scores.user_id, Scores.quiz_id, db.func.max(Scores.attempt_end).label("latest")).group_by(Scores.user_id, Scores.quiz_id).subquery()
+        context=request.args.get('ctx', '').strip()
+        if(context=="TopUsers"):
+            latests=db.session.query(Scores.user_id, Scores.quiz_id, db.func.max(Scores.attempt_end).label("latest")).group_by(Scores.user_id, Scores.quiz_id).subquery()
 
-        joined_set=db.session.query(Scores).join(latests, (Scores.user_id == latests.c.user_id) &(Scores.quiz_id == latests.c.quiz_id) &(Scores.attempt_end == latests.c.latest)).subquery()
+            joined_set=db.session.query(Scores).join(latests, (Scores.user_id == latests.c.user_id) &(Scores.quiz_id == latests.c.quiz_id) &(Scores.attempt_end == latests.c.latest)).subquery()
 
-        total_scores=db.session.query(User.username, db.func.sum(joined_set.c.total_scored).label('total_marks')
+            total_scores=db.session.query(User.username, db.func.sum(joined_set.c.total_scored).label('total_marks')
                                       ).join(User, User.user_id == joined_set.c.user_id
                                              ).group_by(User.username
                                                 ).order_by(db.desc('total_marks')
                                                     ).limit(3).all()
         
-        result={"labels": [r.username for r in total_scores], "data": [r.total_marks for r in total_scores]}
+            result={"labels": [r.username for r in total_scores], "data": [r.total_marks for r in total_scores]}
 
-        return jsonify(result)
+            return jsonify(result)
+        elif(context=="TopAttempts"):
+            attempts=db.session.query(User.user_id, User.username, func.count(Scores.sid).label("attempt_count")).join(Scores, Scores.user_id == User.user_id).group_by(User.user_id, User.username).order_by(desc("attempt_count")).all()
 
+            result={
+                "labels":[r.username for r in attempts][:6], "data":[r.attempt_count for r in attempts][:6]
+            }
+            return jsonify(result)
 
+        elif(context=="TopQuizzes"):
+            attempts=db.session.query(Quiz.quiz_id, Quiz.quiz_name, func.count(Scores.sid).label("attempt_count")).join(Scores, Scores.quiz_id == Quiz.quiz_id).group_by(Quiz.quiz_id, Quiz.quiz_name).order_by(desc("attempt_count")).all()
+
+            result={
+                "labels":[r.quiz_name for r in attempts][:6], "data":[r.attempt_count for r in attempts][:6]
+            }
+            return jsonify(result)
+        elif(context=="userVAvg"):
+            quiz_id=request.args.get('quiz_id')
+            user_scores=db.session.query(Scores.total_scored).filter_by(user_id=current_user.user_id, quiz_id=quiz_id).order_by(Scores.attempt_start.asc()).all()
+
+            user_score_list=[score[0] for score in user_scores]
+
+            all_scores=db.session.query(Scores.user_id, Scores.total_scored, Scores.attempt_start).filter_by(quiz_id=quiz_id).order_by(Scores.user_id, Scores.attempt_start).all()
+
+            from collections import defaultdict
+
+            user_atts=defaultdict(list)
+            for uid, marks, _ in all_scores:
+                user_atts[uid].append(marks)
+
+            max_attempts = max(len(attempts) for attempts in user_atts.values())
+
+            avgs=[]
+            for i in range(max_attempts):
+                att_marks=[]
+                for att in user_atts.values():
+                    if i<len(att):
+                        att_marks.append(att[i])
+                if att_marks:
+                    avgs.append(sum(att_marks)/len(att_marks))
+                else:
+                    avgs.append(None)
+            return jsonify({
+                "user_scores":user_score_list, "avg_scores":avgs
+            })
+            
         
 #--------------------------------------------CRUD RESOURCES--------------------------------------------
 
@@ -668,6 +722,12 @@ def logout():
 @admin_required
 def admin_dashboard():
     return render_template("admin_templates/admin_dashboard.html")
+
+@bp_main.route('/admin/analytics')
+@login_required
+@admin_required
+def analytics():
+    return render_template("admin_templates/analytics.html")
 
 @bp_main.route('/admin/chapters')
 @login_required
