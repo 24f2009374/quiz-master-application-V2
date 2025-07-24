@@ -12,7 +12,7 @@ const { createApp, ref, onMounted }=Vue;
                 try {
                     const response=await axios.get(`/api/prepare/${quiz_id}`);
                     QuizObj.value=response.data;
-                    console.log(QuizObj.value)
+                    
                 } catch(err) {
                     error.value=err.response.data.error;
                 }

@@ -1,6 +1,6 @@
 {% extends "user_base.html" %}
 
-{% block title %}User Dashboard{% endblock %}
+{% block title %}Preparation Page{% endblock %}
 {% block links %}{% endblock %}
 
 {% block content %}
@@ -18,23 +18,30 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
+    
 
         <div class="rounded-box-purple container w-50 text-light shadow-lg"   style="background-color: rgb(15,15,15); padding:0px; margin-bottom: 200px;">
-            <div class="text-center">
-                <h2 class="my-3" style="padding-top: 15px;">Attempt Quiz</h2>
-                <p class="lead">Are you Prepared?</p>
-                <p class="lead">Chapter: <span v-text="QuizObj.parent"></span></p>
-                <p class="lead">Quiz: <span v-text="QuizObj.name "></span></p>
-            </div>
-            <div class="row justify-content-center my-3">
-                <div class="col-lg-6 mx-auto">
-                    <p>Alloted Time: <span v-text="QuizObj.time"></span> Minutes</p>
-                    <p>Alloted Marks: <span v-text="QuizObj.total"></span></p>
-                    <p>Attempt Number: <span v-text="QuizObj.count"></span></p>
-                    <button class="btn btn-warning mx-1 btn-sm" title="Attempt">
-                        <a :href="'/user/attempt/'+QuizObj.id" style="height: 25px; width: 25px;">Attempt Quiz</a>
-                    </button>
+            <div v-if="!QuizObj.total==0">
+                <div class="text-center">
+                    <h2 class="my-3" style="padding-top: 15px;">Attempt Quiz</h2>
+                    <p class="lead">Are you Prepared?</p>
+                    <p class="lead">Chapter: <span v-text="QuizObj.parent"></span></p>
+                    <p class="lead">Quiz: <span v-text="QuizObj.name "></span></p>
                 </div>
+                <div class="row justify-content-center my-3">
+                    <div class="col-lg-6 mx-auto">
+                        <p>Alloted Time: <span v-text="QuizObj.time"></span> Minutes</p>
+                        <p>Alloted Marks: <span v-text="QuizObj.total"></span></p>
+                        <p>Attempt Number: <span v-text="QuizObj.count"></span></p>
+                        <button class="btn btn-warning mx-1 btn-sm" title="Attempt">
+                            <a :href="'/user/attempt/'+QuizObj.id" style="height: 25px; width: 25px;">Attempt Quiz</a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div v-else style="padding: 10px;">
+                <h3>Quiz Has Not Been Initiated. Please Wait </h3>
+                <button class="btn btn-sm btn-primary"><a class="nav-link" href="{{ url_for('main.user_dashboard') }}">To Dashboard</a></button>
             </div>
         </div>
 </div>

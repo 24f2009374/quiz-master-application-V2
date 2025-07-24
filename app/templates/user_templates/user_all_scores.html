@@ -1,6 +1,6 @@
 {% extends "user_base.html" %}
 
-{% block title %}User Dashboard{% endblock %}
+{% block title %}All User Scores{% endblock %}
 {% block links %}{% endblock %}
 
 {% block content %}
@@ -28,38 +28,6 @@
 </div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    const { ref, createApp, onMounted }=Vue;
-    createApp({
-        setup(){
-            const user=ref("")
-            const scores=ref("")
+<script src="{{ url_for('static', filename='js/user_all_scores.js') }}"></script>
 
-            onMounted(async () => {
-                try {
-                    const response=await axios.get('/api/users/me')
-                    user.value=response.data
-
-                    const response2=await axios.get(`/api/users/scores/${user.value.user_id}`)
-                    scores.value=response2.data
-                    console.log(scores.value)
-                } catch(err) {
-                    console.log(err)
-                }
-            })
-
-            const triggerExport=async () => {
-                try {
-                    const response=await axios.get('/api/charts', {params:{ctx:"CSV"}})
-                    alert("Export initiated - You will receive a download link shortly");
-                } catch(err) {
-                    console.log(err)
-                    alert("Failed to trigger export");
-                }
-            }
-
-            return {user, scores, triggerExport}
-        }
-    }).mount("#app")
-</script>
 {% endblock %}

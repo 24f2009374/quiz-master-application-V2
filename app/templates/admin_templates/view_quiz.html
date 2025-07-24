@@ -31,7 +31,6 @@
     <div v-if="!Questions.length" class="text-center text-muted w-100">
         <p style="color: white;">No Questions Yet? </p><a :href="'/admin/quizzes/' + quizObj.id + '/questions/create'">Create Questions</a>
     </div>
-    <!--class="col-12 col-sm-6 col-md-4"-->
     <div class="row row-cols-2">
         <div v-for="(ques, ind) in Questions" :key="ques.id" class="col">
                 <div class="card text-bg-secondary border-black col" style=" margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 500px;">

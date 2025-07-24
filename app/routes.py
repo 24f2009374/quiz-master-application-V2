@@ -37,7 +37,7 @@ def test_mail():
 def monthly_mail():
     from app.celery_app import monthly_report
     monthly_report()
-    print("[FLASK] Mail Prompted, Check Workers, Beats and MailHog [FLASK]")
+    print("[FLASK] Prompted, Check Workers, Beats and MailHog [FLASK]")
     return "Mail sent! Check MailHog."
 #--------------------------------------------ADMIN WRAPPER--------------------------------------------
 def admin_required(f):
