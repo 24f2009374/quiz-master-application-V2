@@ -2,9 +2,10 @@ from celery import Celery
 from celery.schedules import crontab
 from app.mail import send_basic_mail, send_html_mail
 from app.models import User, Quiz, Scores, Chapter, Questions
-from flask import render_template_string
+from flask import render_template_string, current_app
 from . import flask_app
 from datetime import datetime, timedelta
+import csv, os
 
 def create_celery(app):
     celery=Celery(app.import_name)
@@ -144,4 +145,34 @@ def monthly_report():
     
 
     print("[CELERY] Monthly Mail Worker COMPLETED [CELERY]\t[MAIL] Mail Successfully Sent [MAIL]")
+
+
+@celery.task(name="csv_export")
+def csv_export(user_id):
+    print("[CELERY] CSV Export Worker Running [CELERY]")
+    user=User.query.get(user_id)
+    if not user:
+        return
     
+    scores=Scores.query.filter_by(user_id=user_id).all()
+    result=[]
+    for s in scores:
+        quiz=Quiz.query.get(s.quiz_id)
+        result.append({"quiz_id":s.quiz_id, "quiz_name":quiz.quiz_name, "date":s.attempt_end.strftime("%Y-%m-%d"), "score":s.total_scored})
+
+    export_dir=os.path.join(current_app.root_path, "static", "exports")
+    os.makedirs(export_dir, exist_ok=True)
+    timestamp=datetime.now().strftime("%Y%m%d%H%M%S")
+    filename=f"user_{user_id}_export_{timestamp}.csv"
+    filepath=os.path.join(export_dir, filename)
+
+    with open(filepath, mode="w", newline="") as file:
+        writer=csv.writer(file)
+        writer.writerow(["Quiz ID", "Quiz Name", "Date", "Score"])
+        for obj in result:
+            writer.writerow([obj["quiz_id"], obj["quiz_name"], obj["date"], obj["score"]])
+
+    send_basic_mail(subject="Your Quiz CSV Export is Ready", 
+                    recipients=[user.email], 
+                    body=f"Dear {user.username},\n\nYour quiz export is ready. You can download it here:\n"f"{current_app.config['BASE_URL']}/static/exports/{filename}")
+    print("[CELERY] CSV Export Worker COMPLETED [CELERY]\t[MAIL] Mail Successfully Sent [MAIL]")

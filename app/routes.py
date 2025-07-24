@@ -233,7 +233,10 @@ class ChartGeneral(Resource):
             return jsonify({
                 "user_scores":user_score_list, "avg_scores":avgs
             })
-            
+        elif(context=="CSV"):
+            from app.celery_app import csv_export
+            csv_export.delay(current_user.user_id)
+            return {"message": "Export started"},202
         
 #--------------------------------------------CRUD RESOURCES--------------------------------------------
 
@@ -871,6 +874,11 @@ def score(quiz_id):
 @login_required
 def user_search_results():
     return render_template("user_templates/user_search.html")
+
+@bp_main.route('/user/scores/all')
+@login_required
+def user_scores_all():
+    return render_template("user_templates/user_all_scores.html")
 
 
 

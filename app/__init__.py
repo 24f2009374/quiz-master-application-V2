@@ -22,7 +22,8 @@ def create_app():
         CACHE_TYPE='RedisCache',
         CACHE_REDIS_HOST='localhost',
         CACHE_REDIS_PORT=6379,
-        CACHE_DEFAULT_TIMEOUT=60
+        CACHE_DEFAULT_TIMEOUT=60,
+        BASE_URL="http://localhost:5000"
     )
 
     cache.init_app(app)

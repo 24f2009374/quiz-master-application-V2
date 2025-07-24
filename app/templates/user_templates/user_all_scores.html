@@ -1,0 +1,65 @@
+{% extends "user_base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+{% block links %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" id="app">
+    <div v-if="!scores.length" class="text-center text-muted w-100">
+        <p style="color: white;">No Attempts </p>
+    </div>
+    <div class="row">
+        <div class="col ms-5">
+            <ul class="list-group list-group-flush list-group-numbered" >
+                <li class="list-group-item text-bg-secondary border-black" v-for="(s,ind) in scores" :key="s.sid" style="margin-top: 15px; margin-left: 5px; margin-right: 5px;box-shadow: 0 4px 12px rgba(0,0,0,0.8); width: 600px;">
+                    <p><strong>Quiz Name: <span v-text="s.quiz"></span></strong></p>
+                    <p>Attempt Start:  <span v-text="s.start"></span></p>
+                    <p>Attempt End:  <span v-text="s.end"></span></p>
+                    <p>Marks Scores:  <span v-text="s.scored"></span>/<span v-text="s.total"></span></p>
+                </li>
+            </ul>
+        </div>
+        <div class="col">
+            <h3>Data Center</h3>
+            <button @click="triggerExport" class="btn btn-primary">Export Quiz Data as CSV</button>
+        </div>
+    </div>
+
+</div>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    const { ref, createApp, onMounted }=Vue;
+    createApp({
+        setup(){
+            const user=ref("")
+            const scores=ref("")
+
+            onMounted(async () => {
+                try {
+                    const response=await axios.get('/api/users/me')
+                    user.value=response.data
+
+                    const response2=await axios.get(`/api/users/scores/${user.value.user_id}`)
+                    scores.value=response2.data
+                    console.log(scores.value)
+                } catch(err) {
+                    console.log(err)
+                }
+            })
+
+            const triggerExport=async () => {
+                try {
+                    const response=await axios.get('/api/charts', {params:{ctx:"CSV"}})
+                    alert("Export initiated - You will receive a download link shortly");
+                } catch(err) {
+                    console.log(err)
+                    alert("Failed to trigger export");
+                }
+            }
+
+            return {user, scores, triggerExport}
+        }
+    }).mount("#app")
+</script>
+{% endblock %}

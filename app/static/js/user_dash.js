@@ -18,10 +18,15 @@ const { createApp, ref, onMounted } = Vue;
                 }
             })
 
-            //Charts
-            
-
-            
-            return { Enrollments, error, success }
+            const triggerExport=async () => {
+                try {
+                    const response=await axios.get('/api/charts', {params:{ctx:"CSV"}})
+                    alert("Export initiated - You will receive a download link shortly");
+                } catch(err) {
+                    console.log(err)
+                    alert("Failed to trigger export");
+                }
+            }
+            return { Enrollments, error, success, triggerExport }
         }
     }).mount("#app")

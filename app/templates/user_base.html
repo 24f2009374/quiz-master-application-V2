@@ -37,8 +37,7 @@
             <!--Left Links-->
             <div class="navbar-nav me-auto">
                 <a class="nav-link" href="/user/to_enroll">View All Quizzes</a>
-                <a class="nav-link" href="#">View Enrolled Quizzes</a>
-                <a class="nav-link" href="#">View Quiz Scores</a>
+                <a class="nav-link" href="{{ url_for('main.user_scores_all') }}">View Quiz Scores</a>
                 <a class="nav-link" href="{{ url_for('main.user_dashboard') }}">To Dashboard</a>
             </div>
 
