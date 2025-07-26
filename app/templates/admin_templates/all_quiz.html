@@ -17,6 +17,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
+    <div class="mb-4">
+        <button @click="goBack" class="btn btn-secondary">← Back</button>
+    </div>
 
     <div v-if="!Quizzes.length" class="text-center text-muted w-100">
         <p>No Quizzes Defined</p>

@@ -18,6 +18,10 @@ const { createApp, ref, onMounted }=Vue;
                 }
             })
 
-            return {user, error, scores}
+            const goBack = () => {
+                    window.history.back();
+                };
+
+            return {user, error, scores, goBack}
         }
     }).mount("#app")

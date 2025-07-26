@@ -14,7 +14,11 @@ const { createApp, ref, onMounted }=Vue;
                     error.value=err.response.data.error
                 }
             });
+            const goBack = () => {
+                    window.history.back();
+                };
 
-            return { Quizzes, error, success }
+
+            return { Quizzes, error, success, goBack }
         }
     }).mount("#app")

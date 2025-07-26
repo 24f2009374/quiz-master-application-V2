@@ -4,6 +4,7 @@
 
 {%block content%}
 <div id="app" class="container mt-4">
+    
     <div class="container">
         <div v-if="error" class="alert alert-danger alert-dismissible fade show" role="alert">
                     Error: <span v-text="error"></span>
@@ -16,6 +17,9 @@
             Success: <span v-text="success"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
+    <div class="mb-4">
+        <button @click="goBack" class="btn btn-secondary">← Back</button>
     </div>
 
     <div v-if="!Chapters.length" class="text-center text-muted w-100">

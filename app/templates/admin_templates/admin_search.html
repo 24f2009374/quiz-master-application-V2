@@ -4,6 +4,9 @@
 
 {%block content%}
 <div class="container mt-4" id="app" v-cloak>
+    <div class="mb-4">
+        <button @click="goBack" class="btn btn-secondary">← Back</button>
+    </div>
     <div v-if="results">
         <div v-if="users.length">
             <h3>Users</h3>

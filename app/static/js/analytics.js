@@ -117,5 +117,9 @@ const { createApp, ref, onMounted }=Vue;
                 }
             })
         })
+        const goBack = () => {
+                    window.history.back();
+                };
+        return { goBack }
         }
     }).mount("#app")

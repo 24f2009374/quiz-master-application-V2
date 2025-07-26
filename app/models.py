@@ -4,9 +4,6 @@ from app import login_manager
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import cache
 
-
-
-
 class User(db.Model, UserMixin):
     user_id= db.Column(db.Integer, primary_key=True, autoincrement=True)
     username=db.Column(db.String(150), unique=True, nullable=False)
@@ -65,7 +62,6 @@ class Quiz(db.Model):
 
     enrolled_users = db.relationship('User', secondary='enrollments', back_populates='enrolled_quizzes') #relates to usrs and enrolled quizzes 
 
-
 class Questions(db.Model):
     qid=db.Column(db.Integer, primary_key=True, autoincrement=True)
     quiz_id=db.Column(db.Integer, db.ForeignKey('quiz.quiz_id'), nullable=False)
@@ -76,7 +72,6 @@ class Questions(db.Model):
     option_4=db.Column(db.String(255), nullable=True)
     correct_option=db.Column(db.Integer, nullable=False)
     marks=db.Column(db.Integer, nullable=False)
-
 
     def get_options(self):
         return [opt for opt in [self.option_1, self.option_2, self.option_3, self.option_4] if opt]

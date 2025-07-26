@@ -17,10 +17,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
-    <div>
+    <div class="mb-4">
         <button @click="goBack" class="btn btn-secondary">← Back</button>
     </div>
-    <h2>Chapter Name: {% raw %}{{ChapObj.name}}{% endraw %}</h2>
+    <h2>Chapter Name: <span v-text="ChapObj.name"></span></h2>
 
     <div v-if="!Quizzes.length" class="text-center text-muted w-100">
         <p style="color: white;">No Quizzes Yet? </p><a :href="'/admin/chapters/' + ChapObj.id + '/quizzes/create'">Create Quizzes</a>

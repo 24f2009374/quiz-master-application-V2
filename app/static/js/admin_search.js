@@ -40,6 +40,10 @@ const { createApp, ref, onMounted }=Vue;
                 }
             })
 
-            return{results,users,subs,chaps,quizzes}
+            const goBack = () => {
+                    window.history.back();
+                };
+
+            return{results,users,subs,chaps,quizzes, goBack}
         }
     }).mount("#app")

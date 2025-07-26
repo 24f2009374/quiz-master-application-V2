@@ -15,6 +15,10 @@ const { createApp, ref, onMounted }=Vue;
                 }
             });
 
-            return { Chapters, error, success }
+            const goBack = () => {
+                    window.history.back();
+                };
+
+            return { Chapters, error, success, goBack }
         }
     }).mount("#app")
