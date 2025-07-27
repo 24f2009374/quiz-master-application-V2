@@ -12,22 +12,22 @@ const { createApp, ref } = Vue;
                 };
 
                 const submitForm = async () => {
-                    error.value=''; success.value='';
-
-                    console.log(form.value)
+                    //error.value=''; success.value='';
 
                     const nonEmptyOptions = form.value.options.filter(opt => opt.trim() !== '');
 
                     //Integrity checks
                     if(nonEmptyOptions.length<2){
                         error.value="Minimum options are two"
+                        return;
                     }
                         
                     if(!form.value.options[form.value.correct-1]){
                         error.value="Correct Option and Options do not match"
+                        return;
                     }
 
-                try {
+                    try {
                         const parts=window.location.pathname.split('/');
                         quiz_id.value=parseInt(parts[parts.length-3]);
 

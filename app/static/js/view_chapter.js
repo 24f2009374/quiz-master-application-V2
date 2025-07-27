@@ -28,12 +28,12 @@ createApp({
         });
 
         const confirmDelete=async (quiz_id) => {
-                const sure=confirm("Are you sure? This will delete subject and all related questions and data");
+                const sure=confirm("Are you sure? This will delete Quiz and all related questions and data");
                 if(!sure) return;
                 
                 try {
                     await axios.delete(`/api/chapters/${ChapObj.value.id}/quizzes/crud/${quiz_id}`);
-                    success.value="Subject deleted successfully!";
+                    success.value="Quiz deleted successfully!";
 
                     setTimeout(() => {
                         window.location.reload();

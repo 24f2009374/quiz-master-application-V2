@@ -30,9 +30,7 @@ const { createApp, ref, onMounted } = Vue;
                 })
 
                 const submitForm = async () => {
-                    error.value=''; success.value='';
 
-                    console.log(form.value)
 
                     try {
                         await axios.put(`/api/chapters/${quizObj.value.parent}/quizzes/crud`, {name:form.value.quiz_name, time:form.value.time, date:form.value.date, quiz_id:quizObj.value.id})

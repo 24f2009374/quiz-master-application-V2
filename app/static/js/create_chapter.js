@@ -11,7 +11,6 @@ const { createApp, ref } = Vue;
                 };
 
                 const submitForm = async () => {
-                    error.value=''; success.value='';
 
                     try {
                         const parts=window.location.pathname.split('/');

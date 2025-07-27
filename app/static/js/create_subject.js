@@ -11,7 +11,6 @@ const { createApp, ref } = Vue;
                 };
 
                 const submitForm = async () => {
-                    error.value=''; success.value='';
 
                     try {
                         const response= await axios.post('/api/subjects/crud', {sub_name:form.value.sub_name, sub_desc:form.value.sub_text});

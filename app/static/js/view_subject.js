@@ -21,7 +21,6 @@ createApp({
 
                 const response2 = await axios.get(`/api/subjects/${SubjectObj.value.id}/chapters/crud`);
                 Chapters.value=response2.data;
-                console.log(Chapters.value);
 
             } catch(err) {
                 console.error("Smth went wrong:"+err)
@@ -29,12 +28,12 @@ createApp({
         });
 
         const confirmDelete=async (chap_id) => {
-                const sure=confirm("Are you sure? This will delete subject and all related quizzes, questions and data");
+                const sure=confirm("Are you sure? This will delete Chapter and all related quizzes, questions and data");
                 if(!sure) return;
                 
                 try {
                     await axios.delete(`/api/subjects/${SubjectObj.value.id}/chapters/crud/${chap_id}`);
-                    success.value="Subject deleted successfully!";
+                    success.value="Chapter deleted successfully!";
 
                     setTimeout(() => {
                         window.location.reload();

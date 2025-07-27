@@ -11,7 +11,6 @@ const { ref, createApp, onMounted }=Vue;
 
                     const response2=await axios.get(`/api/users/scores/${user.value.user_id}`)
                     scores.value=response2.data
-                    console.log(scores.value)
                 } catch(err) {
                     console.log(err)
                 }

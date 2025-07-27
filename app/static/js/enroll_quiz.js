@@ -22,7 +22,6 @@ const { createApp, ref, onMounted }=Vue;
                 try {
                     const response=await axios.post('/api/enrolls/crud', {user_id:userId, quiz_id:quiz_id})
                     success.value=response.data.message
-                    console.log("working")
                 } catch(err) {
                     console.log(err)
                     error.value = err.response.data.error;

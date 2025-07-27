@@ -147,7 +147,6 @@ class AdminSearch(Resource):
             "quizzes":[{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes] if quizzes else []
         }
 
-        print(search_result)
 
         return search_result
 
@@ -167,7 +166,6 @@ class UserSearch(Resource):
             "quizzes":[{'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':q.chapter_id} for q in quizzes] if quizzes else []
         }
 
-        print(search_result)
 
         return search_result
 
@@ -275,7 +273,6 @@ class DB_Subjects(Resource):
         sub_id=data.get('sub_id')
 
         sub=Subject.query.filter_by(sub_id=sub_id).first()
-        print(data)
 
         if not sub:
             return {"error":"Subject Not Found"}, 404
@@ -289,26 +286,21 @@ class DB_Subjects(Resource):
         return {'message': 'Subject updated successfully'}, 200
     
     def delete(self, sub_id):
-        print("ENDPOINT REACHED  WITH SUBJECT ID ", sub_id)
 
         subject=Subject.query.filter_by(sub_id=sub_id).first()
         if not subject:
             return {'error': 'Subject not found'}, 404
 
-        #Chapters
         chapters=Chapter.query.filter_by(subject_id=sub_id).all()
         for chap in chapters:
-            #Quizzes
             quizzes=Quiz.query.filter_by(chapter_id=chap.chap_id).all()
             for quiz in quizzes:
-                #Questions
                 Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+                Enrollments.query.filter_by(quiz_id=quiz.quiz_id).delete()
+                Scores.query.filter_by(quiz_id=quiz.quiz_id).delete()
 
-                # Step 4: Delete the quiz itself
                 db.session.delete(quiz)
-            # Step 5: Delete the chapter
             db.session.delete(chap)
-        # Step 6: Delete the subject
         db.session.delete(subject)
 
         db.session.commit()
@@ -364,12 +356,14 @@ class DB_Chapters(Resource):
         return {'message': 'Chapter updated successfully'}, 200
     
     def delete(self, sub_id, chap_id):
-        print("ENDPOINT REACHED  WITH CHAPTER ID ", chap_id)
         chapter=Chapter.query.filter_by(chap_id=chap_id).first()
 
         quizzes=Quiz.query.filter_by(chapter_id=chap_id).all()
         for quiz in quizzes:
             Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+            Enrollments.query.filter_by(quiz_id=quiz.quiz_id).delete()
+            Scores.query.filter_by(quiz_id=quiz.quiz_id).delete()
+
             db.session.delete(quiz)
 
         db.session.delete(chapter)
@@ -441,6 +435,8 @@ class DB_Quizzes(Resource):
 
         quiz=Quiz.query.filter_by(quiz_id=quiz_id).first()
         Questions.query.filter_by(quiz_id=quiz.quiz_id).delete()
+        Enrollments.query.filter_by(quiz_id=quiz.quiz_id).delete()
+        Scores.query.filter_by(quiz_id=quiz.quiz_id).delete()
         db.session.delete(quiz)
         db.session.commit()
         cache.delete(f"child_quiz_{chap_id}")
@@ -458,15 +454,11 @@ class DB_Questions(Resource):
     
     def post(self, quiz_id):
         data=request.get_json()
-        print("DATA")
-        print(data)
         question_statement=data.get('question')
         correct=data.get('correct')
         marks=data.get('marks')
         options=data.get('options')
         quiz_id=data.get('quiz_id')
-
-        print(type(question_statement))
 
         if not question_statement or not marks or not correct:
             return {"error":"All Field are required"}, 400
@@ -475,6 +467,7 @@ class DB_Questions(Resource):
 
         if question:
             return {"error": "Question Exists"}, 401
+        
         
         new_ques=Questions(quiz_id=quiz_id,
                            question_statement=question_statement,  
@@ -566,7 +559,6 @@ class AllQuiz(Resource):
             total=0
             for que in ques:
                 total+=que.marks
-            print(total)
             res.append({'id':q.quiz_id, 'name':q.quiz_name, 'time':q.time, 'date':q.date.strftime('%Y-%m-%d'), 'parent':chap.chap_name, 'total':total})
         return res
     

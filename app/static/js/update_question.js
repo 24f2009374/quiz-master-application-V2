@@ -28,9 +28,6 @@ const { createApp, ref, onMounted } = Vue;
                 })
 
                 const submitForm = async () => {
-                    error.value=''; success.value='';
-
-                    console.log(form.value)
 
                     const nonEmptyOptions = form.value.options.filter(opt => opt !== null);
 
@@ -38,10 +35,12 @@ const { createApp, ref, onMounted } = Vue;
                     //Integrity checks
                     if(nonEmptyOptions.length<2){
                         error.value="Minimum options are two"
+                        return;
                     }
                         
                     if(!form.value.options[form.value.correct-1]){
                         error.value="Correct Option and Options do not match"
+                        return;
                     }
 
                     try {

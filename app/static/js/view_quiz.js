@@ -15,7 +15,7 @@ createApp({
             
             try {
                 await axios.delete(`/api/quizzes/${quizObj.value.id}/questions/crud/${q_id}`);
-                success.value="Subject deleted successfully!";
+                success.value="Question deleted successfully!";
 
                 setTimeout(() => {
                     window.location.reload();
